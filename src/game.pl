@@ -7,15 +7,6 @@
 % https://stackoverflow.com/questions/53262099/swi-prolog-how-to-clear-terminal-screen-with-a-keyboard-shortcut-or-global-pre
 clear :- write('\33\[2J').
 
-% read_and_validate(+MaxValidOption, -Input)
-% Reads the input from the user and validates it.
-read_and_validate(MaxValidOption, Input) :-
-    repeat,
-        read(Input),
-    (between(0, MaxValidOption, Input) -> ! ;
-        nl, write('Please enter a valid option.'), nl,
-        nl, write('Chosen option: '), fail).
-
 % initial_board(-Board).
 % Creates the initial game board.
 initial_board(Board) :-
@@ -26,6 +17,28 @@ initial_board(Board) :-
         [neutral, neutral, neutral, neutral, neutral],
         [neutral, neutral, neutral, neutral, neutral]
     ].
+
+% --------------------- %
+% Read/Input Predicates %
+% --------------------- %
+
+% read_and_validate_int(+MaxValidOption, -Input)
+% Reads the input from the user and validates it.
+read_and_validate_int(MaxValidOption, Input) :-
+    repeat,
+        read(Input),
+    (between(0, MaxValidOption, Input) -> ! ;
+        nl, write('Please enter a valid option.'), nl,
+        nl, write('Chosen option: '), fail).
+
+% read_and_validate_string(-PlayerName)
+% Reads the input from the user and validates it.
+read_and_validate_string(PlayerName) :-
+    repeat,
+        read(PlayerName),
+    (PlayerName \= '' -> ! ;
+        nl, write('Please enter a valid name.'), nl,
+        nl, write('Player name: '), fail).
 
 % ----------------- %
 % Layout Predicates %
@@ -55,7 +68,24 @@ layout_difficulty :-
     write(' 1. Random Moves           '), nl,
     write(' 2. Best Available Play    '), nl, nl,
     write(' 0. Exit                   '), nl, nl,
-    write('Chosen option: ').
+    write('Chosen option ').
+
+% layout_player_name(+PlayerColor)
+% Prints the Player Name Intake layout to the screen.
+layout_player_name('') :-
+    write('-------------------------------------------'), nl,
+    write('STAQS | Player Name                        '), nl,
+    write('-------------------------------------------'), nl,
+    write('Please enter the player name               '), nl, nl,
+    write('Don\'t forget to enclose it in single quotes'), nl, nl,
+    write('Player name ').
+layout_player_name(PlayerColor) :-
+    write('-------------------------------------------'), nl,
+    write('STAQS | '), write(PlayerColor), write(' Player Name'), nl,
+    write('-------------------------------------------'), nl,
+    write('Please enter the '), write(PlayerColor), write(' player name'), nl, nl,
+    write('Don\'t forget to enclose it in single quotes'), nl, nl,
+    write('Player name ').
 
 % -------------- %
 % PLAY Predicate %
@@ -78,14 +108,18 @@ play :-
 create_config(GameConfig) :-
     game_mode_selector(GameMode),
     (GameMode \= 1 -> difficulty_selector(Difficulty) ; Difficulty = 0),
-    GameConfig = [GameMode, Difficulty].
+    (GameMode = 1 -> player_name_intake('Blue', BluePlayerName), player_name_intake('White', WhitePlayerName) ;
+     GameMode = 2 -> player_name_intake('', BluePlayerName), WhitePlayerName = 'Computer' ;
+     GameMode = 3 -> player_name_intake('', WhitePlayerName), BluePlayerName = 'Computer' ;
+     GameMode = 4 -> BluePlayerName = 'Computer_B', WhitePlayerName = 'Computer_W' ),
+    GameConfig = [GameMode, Difficulty, BluePlayerName, WhitePlayerName].
 
 % game_mode_selector(-GameMode)
 % Asks the user to choose a game mode.
 game_mode_selector(GameMode) :-
     clear,
     layout_game_mode,
-    read_and_validate(4, GameMode),
+    read_and_validate_int(4, GameMode),
     GameMode \= 0.
 
 % difficulty_selector(-Difficulty)
@@ -93,30 +127,35 @@ game_mode_selector(GameMode) :-
 difficulty_selector(Difficulty) :-
     clear,
     layout_difficulty,
-    read_and_validate(2, Difficulty),
+    read_and_validate_int(2, Difficulty),
     Difficulty \= 0.
+
+% player_name_intake(+PlayerColor, -PlayerName)
+% Asks the user to input the player name.
+player_name_intake(PlayerColor, PlayerName) :-
+    clear,
+    layout_player_name(PlayerColor),
+    read_and_validate_string(PlayerName),
+    PlayerName \= ''.
 
 % ------------------------ %
 % Initial State Predicates %
 % ------------------------ %
 
-/*
-    TODO:
-    This predicate receives a desired game configuration and returns the corresponding initial game state.
-    Game configuration includes the type of each player and other parameters such as board size,
-    use of optional rules, player names, or other information to provide more flexibility to the game.
-    The game state describes a snapshot of the current game state, including board configuration
-    (typically using list of lists with different atoms for the different pieces), identifies the
-    current player (the one playing next), and possibly captured pieces and/or pieces yet to be played,
-    or any other information that may be required, depending on the game.
-*/
-
 % initial_state(+GameConfig, -GameState).
 % Creates the initial game state based on the given game configuration.
 initial_state(GameConfig, GameState) :-
-    initial_board(Board),
     CurrentPlayer = 1, RemainingBlue = 4, RemainingWhite = 4,
-    GameState = [Board, CurrentPlayer, RemainingBlue, RemainingWhite].
+    initial_board(Board), player_config(GameConfig, BluePlayer, WhitePlayer),
+    GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite].
+
+% player_config(+GameConfig, -BluePlayer, -WhitePlayer).
+% Returns the player configuration based on the given game configuration.
+player_config([GameMode, Difficulty, BluePlayerName, WhitePlayerName], BluePlayer, WhitePlayer) :-
+    (GameMode = 1 -> BluePlayer = ['H', BluePlayerName], WhitePlayer = ['H', WhitePlayerName] ;
+     GameMode = 2 -> BluePlayer = ['H', BluePlayerName], WhitePlayer = ['C', WhitePlayerName] ;
+     GameMode = 3 -> BluePlayer = ['C', BluePlayerName], WhitePlayer = ['H', WhitePlayerName] ;
+     GameMode = 4 -> BluePlayer = ['C', BluePlayerName], WhitePlayer = ['C', WhitePlayerName] ).
 
 % ---------------------- %
 % Still TODO: Predicates %
