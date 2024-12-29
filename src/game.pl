@@ -1,26 +1,30 @@
-% -------------------------
-% Auxiliary Predicates
-% -------------------------
+% -------------------- %
+% Auxiliary Predicates %
+% -------------------- %
 
-% Clears the screen
-% Found the code in the following link
+% clear/0
+% Clears the screen. Found the code in the following link.
 % https://stackoverflow.com/questions/53262099/swi-prolog-how-to-clear-terminal-screen-with-a-keyboard-shortcut-or-global-pre
 clear :- write('\33\[2J').
 
-% -------------------------
-% Read/Input Predicates
-% -------------------------
+% read_and_validate(+MaxValidOption, -Input)
+% Reads the input from the user and validates it.
+read_and_validate(MaxValidOption, Input) :-
+    repeat,
+        read(Input),
+    (between(0, MaxValidOption, Input) -> ! ;
+        nl, write('Please enter a valid option.'), nl,
+        nl, write('Chosen option: '), fail).
 
+% ----------------- %
+% Layout Predicates %
+% ----------------- %
 
-
-% -------------------------
-% Printer/Output Predicates
-% -------------------------
-
-% Prints the Main Menu layout to the screen.
-main_menu_printer :-
+% layout_game_mode/0
+% Prints the Game Mode Selector layout to the screen.
+layout_game_mode :-
     write('--------------------------'), nl,
-    write('STAQS | Main Menu         '), nl,
+    write('STAQS | Game Mode         '), nl,
     write('--------------------------'), nl,
     write('Please choose a game mode:'), nl, nl,
     write(' 1. Player vs Player      '), nl,
@@ -30,9 +34,31 @@ main_menu_printer :-
     write(' 0. Exit                  '), nl, nl,
     write('Chosen option: ').
 
-% -------------------------
-% STAQS Main Predicates
-% -------------------------
+% layout_difficulty/0
+% Prints the Difficulty Selector layout to the screen.
+layout_difficulty :-
+    write('---------------------------'), nl,
+    write('STAQS | Difficulty         '), nl,
+    write('---------------------------'), nl,
+    write('Please choose a difficulty:'), nl, nl,
+    write(' 1. Random Moves           '), nl,
+    write(' 2. Best Available Play    '), nl, nl,
+    write(' 0. Exit                  '), nl, nl,
+    write('Chosen option: ').
+
+% -------------- %
+% PLAY Predicate %
+% -------------- %
+
+% play/0
+% Configures the necessary libraries and starts the game.
+play :-
+    use_module(library(between)),
+    main_menu.
+
+% -------------------- %
+% Main Menu Predicates %
+% -------------------- %
 
 /*
     TODO:
@@ -40,12 +66,32 @@ main_menu_printer :-
     which allows configuring the game type (H/H, H/PC, PC/H, or PC/PC), difficulty level(s) to be used
     by the artificial player(s), among other possible parameters, and start the game cycle.
 */
-play :- main_menu.
 
 main_menu :-
+    game_mode_selector(GameMode),
+    difficulty_selector(Difficulty), nl,
+    write('Game Mode: '), write(GameMode), nl,
+    write('Difficulty: '), write(Difficulty), nl.
+
+% game_mode_selector(-GameMode)
+% Asks the user to choose a game mode.
+game_mode_selector(GameMode) :-
     clear,
-    main_menu_printer,
-    read(_).
+    layout_game_mode,
+    read_and_validate(4, GameMode),
+    GameMode \= 0.
+
+% difficulty_selector(-Difficulty)
+% Asks the user to choose a difficulty.
+difficulty_selector(Difficulty) :-
+    clear,
+    layout_difficulty,
+    read_and_validate(2, Difficulty),
+    Difficulty \= 0.
+
+% ---------------------- %
+% Still TODO: Predicates %
+% ---------------------- %
 
 /*
     TODO:
