@@ -1,6 +1,38 @@
-% GameState(Board, CurrentPlayer, RemainingBluePieces, RemainingWhitePieces).
+% -------------------------
+% Auxiliary Predicates
+% -------------------------
 
-clear :- write('\e[H\e[2J').
+% Clears the screen
+% Found the code in the following link
+% https://stackoverflow.com/questions/53262099/swi-prolog-how-to-clear-terminal-screen-with-a-keyboard-shortcut-or-global-pre
+clear :- write('\33\[2J').
+
+% -------------------------
+% Read/Input Predicates
+% -------------------------
+
+
+
+% -------------------------
+% Printer/Output Predicates
+% -------------------------
+
+% Prints the Main Menu layout to the screen.
+main_menu_printer :-
+    write('--------------------------'), nl,
+    write('STAQS | Main Menu         '), nl,
+    write('--------------------------'), nl,
+    write('Please choose a game mode:'), nl, nl,
+    write(' 1. Player vs Player      '), nl,
+    write(' 2. Player vs Computer    '), nl,
+    write(' 3. Computer vs Player    '), nl,
+    write(' 4. Computer vs Computer  '), nl, nl,
+    write(' 0. Exit                  '), nl, nl,
+    write('Chosen option: ').
+
+% -------------------------
+% STAQS Main Predicates
+% -------------------------
 
 /*
     TODO:
@@ -8,7 +40,12 @@ clear :- write('\e[H\e[2J').
     which allows configuring the game type (H/H, H/PC, PC/H, or PC/PC), difficulty level(s) to be used
     by the artificial player(s), among other possible parameters, and start the game cycle.
 */
-% play.
+play :- main_menu.
+
+main_menu :-
+    clear,
+    main_menu_printer,
+    read(_).
 
 /*
     TODO:
