@@ -16,6 +16,17 @@ read_and_validate(MaxValidOption, Input) :-
         nl, write('Please enter a valid option.'), nl,
         nl, write('Chosen option: '), fail).
 
+% initial_board(-Board).
+% Creates the initial game board.
+initial_board(Board) :-
+    Board = [
+        [neutral, neutral, neutral, neutral, neutral],
+        [neutral, neutral, neutral, neutral, neutral],
+        [neutral, neutral, neutral, neutral, neutral],
+        [neutral, neutral, neutral, neutral, neutral],
+        [neutral, neutral, neutral, neutral, neutral]
+    ].
+
 % ----------------- %
 % Layout Predicates %
 % ----------------- %
@@ -43,35 +54,31 @@ layout_difficulty :-
     write('Please choose a difficulty:'), nl, nl,
     write(' 1. Random Moves           '), nl,
     write(' 2. Best Available Play    '), nl, nl,
-    write(' 0. Exit                  '), nl, nl,
+    write(' 0. Exit                   '), nl, nl,
     write('Chosen option: ').
 
 % -------------- %
 % PLAY Predicate %
 % -------------- %
 
-% play/0
-% Configures the necessary libraries and starts the game.
 play :-
+    % Load the necessary libraries.
     use_module(library(between)),
-    main_menu.
+    % Create the GameConfig and initial GameState.
+    create_config(GameConfig),
+    initial_state(GameConfig, GameState),
+    nl, write(GameState).
 
-% -------------------- %
-% Main Menu Predicates %
-% -------------------- %
+% ------------------------ %
+% Create Config Predicates %
+% ------------------------ %
 
-/*
-    TODO:
-    The main predicate, play/0, must be in the game.pl file and must give access to the game menu,
-    which allows configuring the game type (H/H, H/PC, PC/H, or PC/PC), difficulty level(s) to be used
-    by the artificial player(s), among other possible parameters, and start the game cycle.
-*/
-
-main_menu :-
+% create_config(-GameConfig)
+% Displays the configuration menus and creates the GameConfig.
+create_config(GameConfig) :-
     game_mode_selector(GameMode),
-    difficulty_selector(Difficulty), nl,
-    write('Game Mode: '), write(GameMode), nl,
-    write('Difficulty: '), write(Difficulty), nl.
+    (GameMode \= 1 -> difficulty_selector(Difficulty) ; Difficulty = 0),
+    GameConfig = [GameMode, Difficulty].
 
 % game_mode_selector(-GameMode)
 % Asks the user to choose a game mode.
@@ -89,9 +96,9 @@ difficulty_selector(Difficulty) :-
     read_and_validate(2, Difficulty),
     Difficulty \= 0.
 
-% ---------------------- %
-% Still TODO: Predicates %
-% ---------------------- %
+% ------------------------ %
+% Initial State Predicates %
+% ------------------------ %
 
 /*
     TODO:
@@ -103,7 +110,17 @@ difficulty_selector(Difficulty) :-
     current player (the one playing next), and possibly captured pieces and/or pieces yet to be played,
     or any other information that may be required, depending on the game.
 */
-initial_state(+GameConfig, -GameState).
+
+% initial_state(+GameConfig, -GameState).
+% Creates the initial game state based on the given game configuration.
+initial_state(GameConfig, GameState) :-
+    initial_board(Board),
+    CurrentPlayer = 1, RemainingBlue = 4, RemainingWhite = 4,
+    GameState = [Board, CurrentPlayer, RemainingBlue, RemainingWhite].
+
+% ---------------------- %
+% Still TODO: Predicates %
+% ---------------------- %
 
 /*
     TODO:
