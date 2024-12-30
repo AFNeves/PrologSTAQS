@@ -1,3 +1,6 @@
+:- use_module(library(lists)).
+:- use_module(library(between)).
+
 % -------------------- %
 % Auxiliary Predicates %
 % -------------------- %
@@ -44,6 +47,15 @@ read_and_validate_string(PlayerName) :-
 % Layout Predicates %
 % ----------------- %
 
+% display_game(+GameState)
+% Displays the game state to the screen.
+display_game(GameState) :-
+    clear, nl,
+    write('     1   2   3   4   5  '), nl,
+    write('   |---|---|---|---|---|'), nl,
+    GameState = [Board, _, _, _, _, _],
+    layout_board(Board, 1).
+
 % layout_game_mode/0
 % Prints the Game Mode Selector layout to the screen.
 layout_game_mode :-
@@ -87,17 +99,61 @@ layout_player_name(PlayerColor) :-
     write('Don\'t forget to enclose it in single quotes'), nl, nl,
     write('Player name ').
 
+% layout_board(+GameState)
+% Prints the board layout to the screen.
+layout_board([], _).
+layout_board([Row | Rest], RowNumber) :-
+    write(' '), write(RowNumber), layout_row(Row), write(' |'), nl,
+    layout_division_line,
+    NextRowNumber is RowNumber + 1,
+    layout_board(Rest, NextRowNumber).
+
+% layout_row(+Row)
+% Prints the row layout to the screen.
+layout_row([]).
+layout_row([Cell | Rest]) :-
+    write(' | '),
+    (Cell = empty -> write(' ') ;
+     Cell = neutral -> write('#') ;
+     Cell = [blue, Height] -> write('B') ;
+     Cell = [white, Height] -> write('W')),
+    layout_row(Rest).
+
+% layout_division_line/0
+% Prints the division line layout to the screen.
+layout_division_line :-
+    write('   |---|---|---|---|---|'), nl.
+
 % -------------- %
 % PLAY Predicate %
 % -------------- %
 
 play :-
-    % Load the necessary libraries.
-    use_module(library(between)),
     % Create the GameConfig and initial GameState.
     create_config(GameConfig),
     initial_state(GameConfig, GameState),
+    nl, display_game(GameState),
     nl, write(GameState).
+    /*
+    repeat,
+        % Display the game state.
+        display_game(GameState),
+        % Get the valid moves.
+        valid_moves(GameState, ListOfMoves),
+        % Check if the game is over.
+        game_over(GameState, Winner),
+        (Winner \= 0 -> ! ;
+            % Get the move from the player.
+            choose_move(GameState, Player, Move),
+            % Execute the move.
+            move(GameState, Move, NewGameState),
+            % Change the player.
+            change_player(Player, NextPlayer),
+            % Update the game state.
+            update_game_state(NewGameState, NextPlayer, UpdatedGameState),
+            % Repeat the process.
+            fail).
+    */
 
 % ------------------------ %
 % Create Config Predicates %
@@ -151,25 +207,14 @@ initial_state(GameConfig, GameState) :-
 
 % player_config(+GameConfig, -BluePlayer, -WhitePlayer).
 % Returns the player configuration based on the given game configuration.
-player_config([GameMode, Difficulty, BluePlayerName, WhitePlayerName], BluePlayer, WhitePlayer) :-
-    (GameMode = 1 -> BluePlayer = ['H', BluePlayerName], WhitePlayer = ['H', WhitePlayerName] ;
-     GameMode = 2 -> BluePlayer = ['H', BluePlayerName], WhitePlayer = ['C', WhitePlayerName] ;
-     GameMode = 3 -> BluePlayer = ['C', BluePlayerName], WhitePlayer = ['H', WhitePlayerName] ;
-     GameMode = 4 -> BluePlayer = ['C', BluePlayerName], WhitePlayer = ['C', WhitePlayerName] ).
+player_config([1, _, BluePlayerName, WhitePlayerName], ['H', BluePlayerName], ['H', WhitePlayerName]).
+player_config([2, _, BluePlayerName, WhitePlayerName], ['H', BluePlayerName], ['C', WhitePlayerName]).
+player_config([3, _, BluePlayerName, WhitePlayerName], ['C', BluePlayerName], ['H', WhitePlayerName]).
+player_config([4, _, BluePlayerName, WhitePlayerName], ['C', BluePlayerName], ['C', WhitePlayerName]).
 
 % ---------------------- %
 % Still TODO: Predicates %
 % ---------------------- %
-
-/*
-    TODO:
-    This predicate receives the current game state (including the player
-    who will make the next move) and prints the game state to the terminal. Appealing and intuitive
-    visualizations will be valued. Flexible game state representations and visualization predicates will
-    also be valued, for instance those that work with any board size. For uniformization purposes,
-    coordinates should start at (1,1) at the lower left corner.
-*/
-display_game(+GameState).
 
 /*
     TODO:
@@ -179,27 +224,125 @@ display_game(+GameState).
 */
 move(+GameState, +Move, -NewGameState).
 
-/*
-    TODO:
-    This predicate receives the current game state, and
-    returns a list of all possible valid moves.
-*/
-valid_moves(+GameState, -ListOfMoves).
+% ---------------------- %
+% Valid Moves Predicates %
+% ---------------------- %
 
-/*
-    TODO:
-    This predicate receives the current game state, and verifies
-    whether the game is over, in which case it also identifies the winner (or draw). Note that this
-    predicate should not print anything to the terminal.
-*/
-game_over(+GameState, -Winner).
+% valid_moves(+GameState, -ListOfMoves)
+% Returns the list of valid moves for the given game state.
+valid_moves(GameState, ListOfMoves) :-
+    GameState = [Board, CurrentPlayer, _, _, _, _],
+    horizontal_moves(Board, 5, CurrentPlayer, HorizontalMoves),
+    transpose(Board, TransposedBoard),
+    horizontal_moves(TransposedBoard, 1, CurrentPlayer, VerticalMoves),
+    append(HorizontalMoves, VerticalMoves, ListOfMoves).
 
-/*
-    TODO:
-    This predicate receives the current game state and returns a
-    value measuring how good/bad the current game state is to the given Player.
-*/
-value(+GameState, +Player, -Value).
+/* Horizontal Moves */
+
+% horizontal_moves(+Board, +CordY, +Color, -HorizontalMoves)
+% Returns the list of valid horizontal moves for the given player.
+horizontal_moves([], _, _, []).
+horizontal_moves([Row | Rest], CordY, Color, HorizontalMoves) :-
+    valid_hmoves_row(Row, 1, CordY, Color, HorizontalMovesRow),
+    NewCordY is CordY - 1,
+    horizontal_moves(Rest, NewCordY, Color, RestHorizontalMoves),
+    append(HorizontalMovesRow, RestHorizontalMoves, HorizontalMoves).
+
+% valid_hmoves_row(+Row, +CordX, +CordY, +Color, -HorizontalMovesRow)
+% Returns the list of valid horizontal moves in a row for the given player.
+valid_hmoves_row([], _, _, _, []).
+valid_hmoves_row([[Color, _], neutral | Rest], CordX, CordY, Color, HorizontalMovesRow) :-
+    NewCordX is CordX + 1,
+    valid_hmoves_row([neutral | Rest], NewCordX, CordY, Color, RestHorizontalMovesRow),
+    append([[CordX, CordY, right]], RestHorizontalMovesRow, HorizontalMovesRow).
+valid_hmoves_row([neutral, [Color, _] | Rest], CordX, CordY, Color, HorizontalMovesRow) :-
+    NewCordX is CordX + 1,
+    valid_hmoves_row([[Color, _] | Rest], NewCordX, CordY, Color, RestHorizontalMovesRow),
+    append([[NewCordX, CordY, left]], RestHorizontalMovesRow, HorizontalMovesRow).
+valid_hmoves_row([_ | Rest], CordX, CordY, Color, HorizontalMovesRow) :-
+    NewCordX is CordX + 1,
+    valid_hmoves_row(Rest, NewCordX, CordY, Color, HorizontalMovesRow).
+
+/* Vertical Moves */
+
+% vertical_moves(+Board, +CordX, +Color, -VerticalMoves)
+% Returns the list of valid vertical moves for the given player.
+vertical_moves([], _, _, []).
+vertical_moves([Row | Rest], CordX, Color, VerticalMoves) :-
+    valid_vmoves_row(Row, CordX, 5, Color, VerticalMovesRow),
+    NewCordX is CordX + 1,
+    vertical_moves(Rest, NewCordX, Color, RestVerticalMoves),
+    append(VerticalMovesRow, RestVerticalMoves, VerticalMoves).
+
+% valid_vmoves_row(+Row, +CordX, +CordY, +Color, -VerticalMovesRow)
+% Returns the list of valid vertical moves in a row for the given player.
+valid_vmoves_row([], _, _, _, []).
+valid_vmoves_row([[Color, _], neutral | Rest], CordX, CordY, Color, VerticalMovesRow) :-
+    NewCordY is CordY - 1,
+    valid_vmoves_row([neutral | Rest], CordX, NewCordY, Color, RestVerticalMovesRow),
+    append([[CordX, CordY, down]], RestVerticalMovesRow, VerticalMovesRow).
+valid_vmoves_row([neutral, [Color, _] | Rest], CordX, CordY, Color, VerticalMovesRow) :-
+    NewCordY is CordY - 1,
+    valid_vmoves_row([[Color, _] | Rest], CordX, NewCordY, Color, RestVerticalMovesRow),
+    append([[CordX, NewCordY, up]], RestVerticalMovesRow, VerticalMovesRow).
+valid_vmoves_row([_ | Rest], CordX, CordY, Color, VerticalMovesRow) :-
+    NewCordY is CordY - 1,
+    valid_vmoves_row(Rest, CordX, NewCordY, Color, VerticalMovesRow).
+
+% --------------------------- %
+% Game State Value Predicates %
+% --------------------------- %
+
+% value(+GameState, +Player, -Value)
+% Returns the value of the game state to the given player.
+value(GameState, Player, Value) :-
+    GameState = [Board, _, _, _, _, _],
+    value_board(Board, Player, Value).
+
+% value_board(+Board, +Player, -Value)
+% Returns the value of the board to the given player.
+value_board([], _, 0).
+value_board([Row | Rest], Player, Value) :-
+    value_row(Row, Player, RowValue),
+    value_board(Rest, Player, RestValue),
+    Value is RowValue + RestValue.
+
+% value_row(+Row, +Player, -Value)
+% Returns the value of the row to the given player.
+value_row([], _, 0).
+value_row([Cell | Rest], Player, Value) :-
+    value_cell(Cell, Player, CellValue),
+    value_row(Rest, Player, RestValue),
+    Value is CellValue + RestValue.
+
+% value_cell(+Cell, +Player, -Value)
+% Returns the value of the cell to the given player.
+value_cell(empty, _, 0).
+value_cell(neutral, _, 0).
+value_cell([Player, Height], Player, Height).
+value_cell([Player, Height], _, -Height).
+
+% -------------------- %
+% Game Over Predicates %
+% -------------------- %
+
+% game_over(+GameState, -Winner)
+% Checks if the game is over and returns the winner.
+game_over(GameState, Winner) :-
+    valid_moves(GameState, ListOfMovesP1),
+    GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite],
+    (CurrentPlayer == blue -> OtherPlayer = white ; OtherPlayer = blue),
+    valid_moves([Board, OtherPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite], ListOfMovesP2),
+    append(ListOfMovesP1, ListOfMovesP2, ListOfMoves),
+    (ListOfMoves \= [] -> Winner = 0 , ! ;
+     value(GameState, blue, Score),
+      (Score > 0 -> Winner = blue, ! ;
+       Score < 0 -> Winner = white, ! ;
+       Winner = draw)), !.
+
+% ---------------------- %
+% Choose Move Predicates %
+% ---------------------- %
 
 /*
     TODO:
