@@ -21,6 +21,11 @@ initial_board(Board) :-
         [neutral, neutral, neutral, neutral, neutral]
     ].
 
+% count(+List, -N)
+% Counts the number of elements in a list.
+count([], 0).
+count([H | T], N) :- count(T, N1), N is N1 + 1.
+
 % --------------------- %
 % Read/Input Predicates %
 % --------------------- %
@@ -54,7 +59,7 @@ display_game(GameState) :-
     write('     1   2   3   4   5  '), nl,
     write('   |---|---|---|---|---|'), nl,
     GameState = [Board, _, _, _, _, _],
-    layout_board(Board, 1).
+    layout_board(Board, 5).
 
 % layout_game_mode/0
 % Prints the Game Mode Selector layout to the screen.
@@ -105,7 +110,7 @@ layout_board([], _).
 layout_board([Row | Rest], RowNumber) :-
     write(' '), write(RowNumber), layout_row(Row), write(' |'), nl,
     layout_division_line,
-    NextRowNumber is RowNumber + 1,
+    NextRowNumber is RowNumber - 1,
     layout_board(Rest, NextRowNumber).
 
 % layout_row(+Row)
@@ -132,28 +137,53 @@ play :-
     % Create the GameConfig and initial GameState.
     create_config(GameConfig),
     initial_state(GameConfig, GameState),
-    nl, display_game(GameState),
-    nl, write(GameState).
-    /*
     repeat,
-        % Display the game state.
-        display_game(GameState),
-        % Get the valid moves.
-        valid_moves(GameState, ListOfMoves),
         % Check if the game is over.
         game_over(GameState, Winner),
-        (Winner \= 0 -> ! ;
-            % Get the move from the player.
-            choose_move(GameState, Player, Move),
-            % Execute the move.
-            move(GameState, Move, NewGameState),
-            % Change the player.
-            change_player(Player, NextPlayer),
-            % Update the game state.
-            update_game_state(NewGameState, NextPlayer, UpdatedGameState),
-            % Repeat the process.
-            fail).
-    */
+        (Winner == 0 ->
+            % GameState expansion for easier access.
+            GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite],
+            % Display the game state.
+            display_game(GameState),
+            % Placement of the initial pieces.
+            (CurrentPlayer == blue , RemainingBlue > 0 ; CurrentPlayer == white , RemainingWhite > 0 ->
+                % Display the instructions for placing a new piece.
+                nl, write('To place a new piece, enter the coordinates in the format "X Y".'), nl,
+                % Loop to check for valid placements.
+                repeat,
+                    % Ask the user for the coordinates.
+                    nl, write('Please enter the coordinates: '),
+                    % Read and validate the coordinates.
+                    read_and_validate_place(Board, Move),
+                    % Validate the move.
+                    validate_move(Board, Move, Valid),
+                    (Valid == false ->
+                        % Invalid move, so display an error message.
+                        nl, write('Invalid placement.'), nl, fail ;
+                        % Valid move, so place the piece.
+                        move(GameState, Move, NewGameState), !) ;
+                % Display the instructions for moving a piece.
+                    nl, write('To move a piece, enter the coordinates of the piece to move and the direction in the format "X Y up/down/left/right".'), nl,
+                    % Loop to check for valid placements.
+                    repeat,
+                        % Ask the user for the coordinates.
+                        nl, write('Please enter the move: '),
+                        % Read and validate the coordinates.
+                        read_and_validate_move(Board, Move),
+                        % Validate the move.
+                        validate_move(Board, Move, Valid),
+                        (Valid == false ->
+                            % Invalid move, so display an error message.
+                            nl, write('Invalid move.'), nl, fail ;
+                            % Valid move, so place the piece.
+                            move(GameState, Move, NewGameState), !)), ! ;
+        Winner \= 0 ->
+            % Display the game state.
+            display_game(GameState),
+            % Display the winner.
+            (Winner == draw -> nl, write('The game ended in a draw.'), nl ;
+             Winner == blue -> nl, write('The blue player won.'), nl ;
+             Winner == white -> nl, write('The white player won.'), nl), !).
 
 % ------------------------ %
 % Create Config Predicates %
@@ -212,9 +242,9 @@ player_config([2, _, BluePlayerName, WhitePlayerName], ['H', BluePlayerName], ['
 player_config([3, _, BluePlayerName, WhitePlayerName], ['C', BluePlayerName], ['H', WhitePlayerName]).
 player_config([4, _, BluePlayerName, WhitePlayerName], ['C', BluePlayerName], ['C', WhitePlayerName]).
 
-% ---------------------- %
-% Still TODO: Predicates %
-% ---------------------- %
+% --------------------- %
+% Move Piece Predicates %
+% --------------------- %
 
 /*
     TODO:
@@ -222,7 +252,14 @@ player_config([4, _, BluePlayerName, WhitePlayerName], ['C', BluePlayerName], ['
     execution, receiving the current game state and the move to be executed, and (if the move is valid)
     returns the new game state after the move is executed.
 */
-move(+GameState, +Move, -NewGameState).
+% move(+GameState, +Move, -NewGameState)
+move(GameState, Move, NewGameState) :-
+    GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite],
+    validate_move(Board, Move, Valid),
+    (Valid == false -> NewGameState = GameState ;
+     execute_move(Board, Move, NewBoard),
+     change_player(CurrentPlayer, NextPlayer),
+     NewGameState = [NewBoard, NextPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite]).
 
 % ---------------------- %
 % Valid Moves Predicates %
