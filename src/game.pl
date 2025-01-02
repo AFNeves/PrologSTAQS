@@ -26,6 +26,27 @@ initial_board(Board) :-
 count([], 0).
 count([H | T], N) :- count(T, N1), N is N1 + 1.
 
+% replace_row(Row, X, Piece, NewRow)
+% Replaces the piece in the X position of the given row.
+replace_row([], _, _, []).
+replace_row([Cell | Rest], 1, Piece, NewRow) :-
+    NewRow = [Piece | Rest].
+replace_row([Cell | Rest], X, Piece, NewRow) :-
+    NewX is X - 1,
+    replace_row(Rest, NewX, Piece, NewRest),
+    NewRow = [Cell | NewRest].
+
+% replace(+Board, +X, +Y, +Piece, -NewBoard)
+% Replaces the piece at the given coordinates. Y is list relative, not coordinate relative.
+replace([], _, _, _, []).
+replace([Row | Rest], X, 1, Piece, NewBoard) :-
+    replace_row(Row, X, Piece, NewRow),
+    NewBoard = [NewRow | Rest].
+replace([Row | Rest], X, Y, Piece, NewBoard) :-
+    NewY is Y - 1,
+    replace(Rest, X, NewY, Piece, NewRest),
+    NewBoard = [Row | NewRest].
+
 % --------------------- %
 % Read/Input Predicates %
 % --------------------- %
@@ -163,20 +184,20 @@ play :-
                         % Valid move, so place the piece.
                         move(GameState, Move, NewGameState), !) ;
                 % Display the instructions for moving a piece.
-                    nl, write('To move a piece, enter the coordinates of the piece to move and the direction in the format "X Y up/down/left/right".'), nl,
-                    % Loop to check for valid placements.
-                    repeat,
-                        % Ask the user for the coordinates.
-                        nl, write('Please enter the move: '),
-                        % Read and validate the coordinates.
-                        read_and_validate_move(Board, Move),
-                        % Validate the move.
-                        validate_move(Board, Move, Valid),
-                        (Valid == false ->
-                            % Invalid move, so display an error message.
-                            nl, write('Invalid move.'), nl, fail ;
-                            % Valid move, so place the piece.
-                            move(GameState, Move, NewGameState), !)), ! ;
+                nl, write('To move a piece, enter the coordinates of the piece to move and the direction in the format "X Y up/down/left/right".'), nl,
+                % Loop to check for valid placements.
+                repeat,
+                    % Ask the user for the coordinates.
+                    nl, write('Please enter the move: '),
+                    % Read and validate the coordinates.
+                    read_and_validate_move(Board, Move),
+                    % Validate the move.
+                    validate_move(Board, Move, Valid),
+                    (Valid == false ->
+                        % Invalid move, so display an error message.
+                        nl, write('Invalid move.'), nl, fail ;
+                        % Valid move, so place the piece.
+                        move(GameState, Move, NewGameState), !)), ! ;
         Winner \= 0 ->
             % Display the game state.
             display_game(GameState),
@@ -246,20 +267,90 @@ player_config([4, _, BluePlayerName, WhitePlayerName], ['C', BluePlayerName], ['
 % Move Piece Predicates %
 % --------------------- %
 
-/*
-    TODO:
-    This predicate is responsible for move validation and
-    execution, receiving the current game state and the move to be executed, and (if the move is valid)
-    returns the new game state after the move is executed.
-*/
 % move(+GameState, +Move, -NewGameState)
+% Moves the piece to the new coordinates.
 move(GameState, Move, NewGameState) :-
     GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite],
-    validate_move(Board, Move, Valid),
+    validate_move(Board, CurrentPlayer, Move, Valid),
     (Valid == false -> NewGameState = GameState ;
-     execute_move(Board, Move, NewBoard),
+     execute_move(Board, CurrentPlayer, Move, NewBoard),
      change_player(CurrentPlayer, NextPlayer),
      NewGameState = [NewBoard, NextPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite]).
+
+% check_owner(+Board, +CordX, +CordY, +CurrentPlayer, -Valid)
+% Checks if the piece at the given coordinates belongs to the current player.
+check_owner(Board, CordX, CordY, CurrentPlayer, Valid) :-
+    Valid = true,
+    PieceRowNumber is 6 - CordY,
+    nth1(PieceRowNumber, Board, PieceRow),
+    nth1(CordX, PieceRow, Piece),
+    (CurrentPlayer == blue, Piece \= [blue, _] ; CurrentPlayer == white, Piece \= [white, _] ; Piece == neutral ; Piece == empty -> Valid = false).
+
+% change_player(+CurrentPlayer, -NextPlayer)
+% Changes the current player to the next player.
+change_player(CurrentPlayer, NextPlayer) :-
+    (CurrentPlayer == blue -> NextPlayer = white ; NextPlayer = blue).
+
+% validate_move(+Board, +CurrentPlayer, +Move, -Valid)
+% Validates the given move.
+validate_move(Board, CurrentPlayer, [CordX, CordY], Valid) :-
+    (CurrentPlayer == blue, RemainingBlue == 0 ; CurrentPlayer == white, RemainingWhite == 0 -> Valid = false, fail),
+    RowNumber is 6 - CordY,
+    nth1(RowNumber, Board, Row),
+    nth1(CordX, Row, Cell),
+    (Cell == neutral -> Valid = true ; Valid = false).
+validate_move(Board, CurrentPlayer, [CordX, CordY, up], Valid) :-
+    (CordY >= 5 -> Valid = false, fail),
+    check_owner(Board, CordX, CordY, CurrentPlayer, OwnerValid),
+    (OwnerValid == false -> Valid = false, fail),
+    NewPieceRowNumber is 6 - CordY - 1,
+    nth1(NewPieceRowNumber, Board, NewPieceRow),
+    nth1(CordX, NewPieceRow, NewPiece),
+    (NewPiece == neutral -> Valid = true ; Valid = false).
+validate_move(Board, CurrentPlayer, [CordX, CordY, down], Valid) :-
+    (CordY =< 1 -> Valid = false, fail),
+    check_owner(Board, CordX, CordY, CurrentPlayer, OwnerValid),
+    (OwnerValid == false -> Valid = false, fail),
+    NewPieceRowNumber is 6 - CordY + 1,
+    nth1(NewPieceRowNumber, Board, NewPieceRow),
+    nth1(CordX, NewPieceRow, NewPiece),
+    (NewPiece == neutral -> Valid = true ; Valid = false).
+validate_move(Board, CurrentPlayer, [CordX, CordY, left], Valid) :-
+    (CordX =< 1 -> Valid = false, fail),
+    check_owner(Board, CordX, CordY, CurrentPlayer, OwnerValid),
+    (OwnerValid == false -> Valid = false, fail),
+    NewPieceRowNumber is 6 - CordY,
+    NewPieceColumnNumber is CordX - 1,
+    nth1(NewPieceRowNumber, Board, NewPieceRow),
+    nth1(NewPieceColumnNumber, NewPieceRow, NewPiece),
+    (NewPiece == neutral -> Valid = true ; Valid = false).
+validate_move(Board, CurrentPlayer, [CordX, CordY, right], Valid) :-
+    (CordX >= 5 -> Valid = false, fail),
+    check_owner(Board, CordX, CordY, CurrentPlayer, OwnerValid),
+    (OwnerValid == false -> Valid = false, fail),
+    NewPieceRowNumber is 6 - CordY,
+    NewPieceColumnNumber is CordX + 1,
+    nth1(NewPieceRowNumber, Board, NewPieceRow),
+    nth1(NewPieceColumnNumber, NewPieceRow, NewPiece),
+    (NewPiece == neutral -> Valid = true ; Valid = false).
+
+% execute_move(+Board, +CurrentPlayer, +Move, -NewBoard)
+% Executes the given move.
+execute_move(Board, CurrentPlayer, [CordX, CordY], NewBoard) :-
+    (CurrentPlayer == blue -> Piece = [blue, 1] ; Piece = [white, 1]),
+    MatrixCordY is 6 - CordY,
+    replace(Board, CordX, MatrixCordY, Piece, NewBoard).
+execute_move(Board, CurrentPlayer, [CordX, CordY, Direction], NewBoard) :-
+    (Direction \= up, Direction \= down, Direction \= left, Direction \= right -> NewBoard = Board, !),
+    MatrixCordY is 6 - CordY,
+    nth1(MatrixCordY, Board, PieceRow),
+    nth1(CordX, PieceRow, Piece),
+    replace(Board, CordX, MatrixCordY, neutral, CleanedBoard),
+    (Direction == up    -> NewCordX = CordX, NewCordY is MatrixCordY + 1 ;
+     Direction == down  -> NewCordX = CordX, NewCordY is MatrixCordY - 1 ;
+     Direction == left  -> NewCordY = MatrixCordY, NewCordX is CordX - 1 ;
+     Direction == right -> NewCordY = MatrixCordY, NewCordX is CordX + 1),
+    replace(CleanedBoard, NewCordX, NewCordY, Piece, NewBoard).
 
 % ---------------------- %
 % Valid Moves Predicates %
