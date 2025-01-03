@@ -1,6 +1,6 @@
-% ------------------------ %
-% Create Config Predicates %
-% ------------------------ %
+% --------------------- %
+% GameConfig Predicates %
+% --------------------- %
 
 % create_config(-GameConfig)
 % Displays the configuration menus and creates the GameConfig.
@@ -41,14 +41,14 @@ player_name_intake(PlayerColor, PlayerName) :-
 % Initial State Predicates %
 % ------------------------ %
 
-% initial_state(+GameConfig, -GameState).
+% initial_state(+GameConfig, -GameState)
 % Creates the initial game state based on the given game configuration.
 initial_state(GameConfig, GameState) :-
     CurrentPlayer = blue, RemainingBlue = 4, RemainingWhite = 4,
     initial_board(Board), player_config(GameConfig, BluePlayer, WhitePlayer),
     GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite].
 
-% player_config(+GameConfig, -BluePlayer, -WhitePlayer).
+% player_config(+GameConfig, -BluePlayer, -WhitePlayer)
 % Returns the player configuration based on the given game configuration.
 player_config([1, _, BluePlayerName, WhitePlayerName], ['H', BluePlayerName], ['H', WhitePlayerName]).
 player_config([2, _, BluePlayerName, WhitePlayerName], ['H', BluePlayerName], ['C', WhitePlayerName]).
