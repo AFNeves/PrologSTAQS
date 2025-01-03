@@ -7,6 +7,15 @@
 % https://stackoverflow.com/questions/53262099/swi-prolog-how-to-clear-terminal-screen-with-a-keyboard-shortcut-or-global-pre
 clear :- write('\33\[2J').
 
+% count(+List, -N)
+% Counts the number of elements in a list.
+count([], 0).
+count([H | T], N) :- count(T, N1), N is N1 + 1.
+
+% ----------------------------- %
+% Board Manipulation Predicates %
+% ----------------------------- %
+
 % initial_board(-Board)
 % Creates the initial state board.
 initial_board(Board) :-
@@ -17,13 +26,6 @@ initial_board(Board) :-
         [neutral, neutral, neutral, neutral, neutral],
         [neutral, neutral, neutral, neutral, neutral]
     ].
-
-% count(+List, -N)
-% Counts the number of elements in a list.
-count([], 0).
-count([H | T], N) :- count(T, N1), N is N1 + 1.
-
-/* Board Manipulation */
 
 % replace(+Board, +X, +Y, +Piece, -NewBoard)
 % Replaces the piece at the given coordinates. Y is list relative, not coordinate relative.
