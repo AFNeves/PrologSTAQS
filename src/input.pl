@@ -1,9 +1,11 @@
-% --------------------- %
-% Read/Input Predicates %
-% --------------------- %
+% --------------------------- %
+% Input Validation Predicates %
+% --------------------------- %
+
+/* Game Config */
 
 % read_and_validate_int(+MaxValidOption, -Input)
-% Reads the input from the user and validates it.
+% Reads the input from the user and validates it. Returns the option chosen.
 read_and_validate_int(MaxValidOption, Input) :-
     repeat,
         read(Input),
@@ -12,7 +14,7 @@ read_and_validate_int(MaxValidOption, Input) :-
         nl, write('Chosen option: '), fail).
 
 % read_and_validate_string(-PlayerName)
-% Reads the input from the user and validates it.
+% Reads the input from the user and validates it. Returns the player name.
 read_and_validate_string(PlayerName) :-
     repeat,
         read(PlayerName),
@@ -20,8 +22,10 @@ read_and_validate_string(PlayerName) :-
         nl, write('Please enter a valid name.'), nl,
         nl, write('Player name: '), fail).
 
+/* Game Loop */
+
 % read_and_validate_place(-Move)
-% Reads the input from the user and validates it.
+% Reads the input from the user and validates it. Returns a placing move.
 read_and_validate_place(Move) :-
     repeat,
         get_code(InputX), get_code(Space), get_code(InputY), skip_line,
@@ -31,7 +35,7 @@ read_and_validate_place(Move) :-
     X is InputX - 48, Y is InputY - 48, Move = [X, Y].
 
 % read_and_validate_move(-Move)
-% Reads the input from the user and validates it.
+% Reads the input from the user and validates it. Returns a moving move.
 read_and_validate_move(Move) :-
     repeat,
         get_code(InputX), get_code(Space_1), get_code(InputY), get_code(Space_2), get_code(Direction), skip_line,
