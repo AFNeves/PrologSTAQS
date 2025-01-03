@@ -174,29 +174,36 @@ layout_row([Cell | Rest]) :-
 layout_division_line :-
     write('  |---|---|---|---|---|'), nl.
 
-% -------------- %
-% PLAY Predicate %
-% -------------- %
+% --------------- %
+% PLAY Predicates %
+% --------------- %
 
+% play/0
+% Main predicate to start the game.
 play :-
     % Create the GameConfig and initial GameState.
     create_config(GameConfig),
-    initial_state(GameConfig, GameState),
-    % Start the game loop.
-    repeat,
-        % Check if the game is over.
-        game_over(GameState, Winner),
-        % Display the game state.
-        display_game(GameState),
-        (
-            % Players are placing their pieces.
-            Winner == 0 -> place_loop(GameState, NewGameState), GameState = NewGameState ;
-            % Players are moving their pieces.
-            Winner == 1 -> move_loop(GameState, NewGameState), GameState = NewGameState ;
-            % Game is over, time to display the winner.
-            (Winner == draw -> nl, write('The game ended in a draw.'), nl ;
-             Winner == blue -> nl, write('The blue player won.'), nl ;
-             Winner == white -> nl, write('The white player won.'), nl), !).
+    initial_state(GameConfig, GameState), skip_line,
+    % Run the game loop.
+    game_loop(GameState).
+
+% game_loop(+GameState)
+% Main game loop that controls the game flow.
+game_loop(GameState) :-
+    % Check if the game is over.
+    game_over(GameState, Winner),
+    % Display the game state.
+    display_game(GameState),
+    (
+        % Players are placing their pieces.
+        Winner == 0 -> place_loop(GameState, NewGameState), game_loop(NewGameState, Winner) ;
+        % Players are moving their pieces.
+        Winner == 1 -> move_loop(GameState, NewGameState), game_loop(NewGameState) ;
+        % Game is over, time to display the winner.
+        (Winner == draw -> nl, write('The game ended in a draw.'), nl ;
+         Winner == blue -> nl, write('The blue player won.'), nl ;
+         Winner == white -> nl, write('The white player won.'), nl)
+    ).
 
 % place_loop(+GameState, -NewGameState)
 % Loop that is executed while the players are placing their initial pieces.
@@ -204,7 +211,7 @@ place_loop(GameState, NewGameState) :-
     % GameState expansion for easier access.
     GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite],
     % Display the instructions for placing a new piece.
-    nl, write('To place a new piece, enter the coordinates in the format "X Y".'), nl, skip_line,
+    nl, write('To place a new piece, enter the coordinates in the format: X Y'), nl,
     % Loop to check for valid placements.
     repeat,
         % Ask the user to enter valid coordinates.
@@ -217,7 +224,7 @@ place_loop(GameState, NewGameState) :-
             % Invalid move, so display an error message.
             nl, write('Invalid placement.'), nl, fail ;
             % Valid move, so place the piece.
-            move(GameState, Move, NewGameState), !, true).
+            move(GameState, Move, NewGameState), !).
 
 % move_loop(+GameState, -NewGameState)
 % Loop that is executed while the players are moving their pieces.
