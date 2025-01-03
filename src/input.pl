@@ -11,7 +11,7 @@ read_and_validate_int(MaxValidOption, Input) :-
         read(Input),
     (between(0, MaxValidOption, Input) -> ! ;
         nl, write('Please enter a valid option.'), nl,
-        nl, write('Chosen option: '), fail).
+        nl, write('Chosen option '), fail).
 
 % read_and_validate_string(-PlayerName)
 % Reads the input from the user and validates it. Returns the player name.
