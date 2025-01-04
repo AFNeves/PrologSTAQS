@@ -17,8 +17,8 @@ read_and_validate_int(MaxValidOption, Input) :-
 % Reads the input from the user and validates it. Returns the player name.
 read_and_validate_string(PlayerName) :-
     repeat,
-        read(PlayerName),
-    (PlayerName \= '' -> ! ;
+        read(PlayerName), atom_length(PlayerName, NameLength),
+    (PlayerName \= '', NameLength < 15 -> ! ;
         nl, write('Please enter a valid name.'), nl,
         nl, write('Player name: '), fail).
 
