@@ -1,15 +1,8 @@
-% ----------------- %
-% Layout Predicates %
-% ----------------- %
+% ------------------ %
+% Layouts Predicates %
+% ------------------ %
 
-% display_game(+GameState)
-% Displays the game state to the screen.
-display_game(GameState) :-
-    clear, nl,
-    GameState = [Board, _, _, _, _, _],
-    layout_division_line,
-    layout_board(Board, 5),
-    write('    1   2   3   4   5  '), nl.
+/* Game Config Layouts */
 
 % layout_game_mode/0
 % Prints the Game Mode Selector layout to the screen.
@@ -40,21 +33,44 @@ layout_difficulty :-
 % layout_player_name(+PlayerColor)
 % Prints the Player Name Intake layout to the screen.
 layout_player_name('') :-
-    write('-------------------------------------------'), nl,
-    write('STAQS | Player Name                        '), nl,
-    write('-------------------------------------------'), nl,
-    write('Please enter the player name               '), nl, nl,
-    write('Don\'t forget to enclose it in single quotes'), nl, nl,
-    write('Player name ').
+    write('------------------------------'), nl,
+    write('STAQS | Player\'s Name        '), nl,
+    write('------------------------------'), nl,
+    write('Please enter the player\'s name'), nl, nl,
+    write('Player ').
 layout_player_name(PlayerColor) :-
-    write('-------------------------------------------'), nl,
-    write('STAQS | '), write(PlayerColor), write(' Player Name'), nl,
-    write('-------------------------------------------'), nl,
-    write('Please enter the '), write(PlayerColor), write(' player name'), nl, nl,
-    write('Don\'t forget to enclose it in single quotes'), nl, nl,
-    write('Player name ').
+    write('------------------------------'), nl,
+    write('STAQS | '), write(PlayerColor), write(' Player\'s Name'), nl,
+    write('------------------------------'), nl,
+    write('Please enter the player\'s name'), nl, nl,
+    write('Player ').
 
-% layout_board(+GameState)
+/* Game Loop Layouts */
+
+% display_game(+GameState)
+% Displays the game state to the screen.
+display_game(GameState) :-
+    GameState = [Board, CurrentPlayer, [_, BluePlayerName], [_, WhitePlayerName], RemainingBlue, RemainingWhite],
+    % Board Layout
+    clear, nl,
+    write('  |---|---|---|---|---|'), nl,
+    layout_board(Board, 5),
+    write('    1   2   3   4   5  '), nl,
+    % Player Info Layout
+    atom_length(BluePlayerName, BCount), atom_length(WhitePlayerName, WCount),
+    BSpaceN is 15 - BCount, WSpaceN is 15 - WCount,
+    make_space(BSpaceN, BSpace), make_space(WSpaceN, WSpace),
+    nl, write(BluePlayerName), write(BSpace), write(' B | '), write(RemainingBlue),
+    nl, write(WhitePlayerName), write(WSpace), write(' W | '), write(RemainingWhite).
+
+% current_player\0
+% Displays the current player to the screen.
+current_player :-
+    nl, nl, write('Current Turn: '),
+    (CurrentPlayer = blue -> write(BluePlayerName) ;
+     CurrentPlayer = white -> write(WhitePlayerName)), nl.
+
+% layout_board(+Board, +RowNumber)
 % Prints the board layout to the screen.
 layout_board([], _).
 layout_board([Row | Rest], RowNumber) :-
@@ -75,6 +91,6 @@ layout_row([Cell | Rest]) :-
     layout_row(Rest).
 
 % layout_division_line/0
-% Prints the division line layout to the screen.
+% Prints the division line to the screen.
 layout_division_line :-
     write('  |---|---|---|---|---|'), nl.
