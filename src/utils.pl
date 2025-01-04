@@ -16,6 +16,7 @@ count([H | T], N) :- count(T, N1), N is N1 + 1.
 % Creates a string with N spaces.
 make_space(0, '').
 make_space(N, Space) :-
+    N > 0,
     N1 is N - 1,
     make_space(N1, Space1),
     atom_concat(' ', Space1, Space).
