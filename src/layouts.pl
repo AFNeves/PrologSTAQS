@@ -50,22 +50,31 @@ layout_player_name(PlayerColor) :-
 % display_game(+GameState)
 % Displays the game state to the screen.
 display_game(GameState) :-
-    GameState = [Board, CurrentPlayer, [_, BluePlayerName], [_, WhitePlayerName], RemainingBlue, RemainingWhite],
-    % Board Layout
+    GameState = [Board, _, _, _, _, _],
     clear, nl,
     write('  |---|---|---|---|---|'), nl,
     layout_board(Board, 5),
-    write('    1   2   3   4   5  '), nl,
-    % Player Info Layout
-    atom_length(BluePlayerName, BCount), atom_length(WhitePlayerName, WCount),
-    BSpaceN is 15 - BCount, WSpaceN is 15 - WCount,
-    dup_char(BSpaceN, ' ', BSpace), make_space(WSpaceN, WSpace),
-    nl, write(BluePlayerName), write(BSpace), write(' B | '), write(RemainingBlue),
-    nl, write(WhitePlayerName), write(WSpace), write(' W | '), write(RemainingWhite).
+    write('    1   2   3   4   5  '), nl.
 
-% current_player(+CurrentPlayer, +BluePlayer, +WhitePlayer)
+% player_info(+GameState)
+% Displays the player information to the screen.
+player_info(GameState) :-
+    % GameState expansion for easier access.
+    GameState = [_, _, [_, BluePlayerName], [_, WhitePlayerName], RemainingBlue, RemainingWhite],
+    % Calculate the number of spaces needed to align the player names.
+    atom_length(BluePlayerName, BCount), atom_length(WhitePlayerName, WCount),
+    BSpaceN is 11 - BCount, WSpaceN is 11 - WCount,
+    dup_char(BSpaceN, ' ', BSpace), dup_char(WSpaceN, ' ', WSpace),
+    % Fetch the game score.
+    value(GameState, blue, BlueValue), value(GameState, white, WhiteValue),
+    % Write the player information to the screen.
+    nl, write(BluePlayerName), write(BSpace), write(' B | '), write(RemainingBlue), write(' | '), write(BlueValue),
+    nl, write(WhitePlayerName), write(WSpace), write(' W | '), write(RemainingWhite), write(' | '), write(WhiteValue).
+
+% current_player(+GameState)
 % Displays the current player to the screen.
-current_player(CurrentPlayer, [_, BluePlayerName], [_, WhitePlayerName]) :-
+current_player(GameState) :-
+    GameState = [_, CurrentPlayer, [_, BluePlayerName], [_, WhitePlayerName], _, _],
     nl, nl, write('Current Turn: '),
     (CurrentPlayer = blue -> write(BluePlayerName) ;
      CurrentPlayer = white -> write(WhitePlayerName)).
