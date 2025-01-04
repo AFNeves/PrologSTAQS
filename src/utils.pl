@@ -10,7 +10,7 @@ clear :- write('\33\[2J').
 % count(+List, -N)
 % Counts the number of elements in a list.
 count([], 0).
-count([H | T], N) :- count(T, N1), N is N1 + 1.
+count([_ | T], N) :- count(T, N1), N is N1 + 1.
 
 % dup_char(+N, +Char, -Sequence)
 % Creates a sequence of n repeated characters.

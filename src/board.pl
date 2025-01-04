@@ -16,7 +16,7 @@ replace([Row | Rest], X, Y, Piece, NewBoard) :-
 % replace_row(+Row, +X, +Piece, -NewRow)
 % Replaces the piece in the X position of the given row.
 replace_row([], _, _, []).
-replace_row([Cell | Rest], 1, Piece, NewRow) :-
+replace_row([_ | Rest], 1, Piece, NewRow) :-
     NewRow = [Piece | Rest].
 replace_row([Cell | Rest], X, Piece, NewRow) :-
     NewX is X - 1,
