@@ -1,4 +1,5 @@
 :- use_module(library(lists)).
+:- use_module(library(random)).
 :- use_module(library(between)).
 
 :- include('utils.pl').
@@ -77,7 +78,7 @@ move_loop(GameState, NewGameState) :-
     % Display the current player and the remaining pieces.
     current_player(GameState),
     % Display the instructions for moving a piece.
-    nl, write('To move a piece, enter the coordinates of the piece'), nl,
+    nl, nl, write('To move a piece, enter the coordinates of the piece'), nl,
     write('  to move and the direction in the format "X Y [A/W/S/D]".'), nl,
     % Loop to check for valid placements.
     repeat,
@@ -303,12 +304,54 @@ game_over(GameState, Winner) :-
 % Choose Move Predicates %
 % ---------------------- %
 
-/*
-    TODO:
-    This predicate receives the current game state and
-    returns the move chosen by the computer player. Level 1 should return a random valid move. Level
-    2 should return the best play at the time (using a greedy algorithm), considering the evaluation of
-    the game state as determined by the value/3 predicate. For human players, it should interact with
-    the user to read the move.
-*/
-% choose_move(+GameState, +Player, -Move)
+% choose_move(+GameState, +Level, -Move)
+% Chooses the move for the computer player.
+choose_move(GameState, 1, Move) :-
+    % Find all valid moves.
+    valid_moves(GameState, ListOfMoves),
+    % Choose a random move from the list.
+    random_member(Move, ListOfMoves).
+choose_move(GameState, 2, Move) :-
+    % GameState expansion for easier access.
+    GameState = [_, CurrentPlayer, _, _, _, _],
+    % Find all valid moves.
+    valid_moves(GameState, ListOfMoves),
+    findall(
+        [Value, Move],
+        (
+            member(Move, ListOfMoves),
+            move(GameState, Move, NewGameState),
+            value(NewGameState, CurrentPlayer, Value)
+        ),
+        ListOfValues
+    ),
+    % Sort the list of values.
+    sort(ListOfValues, SortedListOfValues),
+    % Get the best move.
+    last(SortedListOfValues, [_, Move]).
+% Chooses the move for the human player.
+choose_move([Board, CurrentPlayer, BluePlayer, WhitePlayer, 0, 0], 0, Move) :-
+    % Display the instructions for placing a new piece.
+    nl, nl, write('To place a new piece, enter the coordinates in the format: X Y'), nl,
+    % Loop to check for valid placements.
+    repeat,
+        % Ask the user to enter valid coordinates.
+        nl, write('Please enter the coordinates: '),
+        % Read and validate the coordinates.
+        read_and_validate_place(Move),
+        % Validate the move.
+        validate_move(Board, CurrentPlayer, Move, Valid),
+        (Valid == true -> ! ; nl, write('Invalid placement.'), nl, fail ).
+choose_move([Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite], 0, Move) :-
+    % Display the instructions for moving a piece.
+    nl, nl, write('To move a piece, enter the coordinates of the piece'), nl,
+    write('  to move and the direction in the format "X Y [A/W/S/D]".'), nl,
+    % Loop to check for valid placements.
+    repeat,
+        % Ask the user for the coordinates.
+        nl, write('Please enter the move: '),
+        % Read and validate the coordinates.
+        read_and_validate_move(Move),
+        % Validate the move.
+        validate_move(Board, CurrentPlayer, Move, Valid),
+        (Valid == true -> ! ; nl, write('Invalid move.'), nl, fail).
