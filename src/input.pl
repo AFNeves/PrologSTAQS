@@ -43,7 +43,7 @@ read_and_validate_move(Move) :-
             nl, write('Please enter a valid move.'), nl,
             nl, write('Please enter the move: '), fail),
     X is InputX - 48, Y is InputY - 48,
-        (Direction == 65 ; Direction == 97 -> Move = [X, Y, up] ;
-            (Direction == 68 ; Direction == 100 -> Move = [X, Y, down] ;
-                (Direction == 83 ; Direction == 115 -> Move = [X, Y, left] ;
+        (Direction == 87 ; Direction == 119 -> Move = [X, Y, up] ;
+            (Direction == 83 ; Direction == 115 -> Move = [X, Y, down] ;
+                (Direction == 65 ; Direction == 97 -> Move = [X, Y, left] ;
                     Move = [X, Y, right]))).
