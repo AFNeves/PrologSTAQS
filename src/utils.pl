@@ -20,3 +20,8 @@ dup_char(N, Char, Sequence) :-
     N1 is N - 1,
     dup_char(N1, Char, Sequence1),
     atom_concat(Char, Sequence1, Sequence).
+
+% change_player(+CurrentPlayer, -NextPlayer)
+% Changes the current player to the next player.
+change_player(CurrentPlayer, NextPlayer) :-
+    (CurrentPlayer == blue -> NextPlayer = white ; NextPlayer = blue).
