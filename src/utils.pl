@@ -36,6 +36,15 @@ initial_board(Board) :-
         [neutral, neutral, neutral, neutral, neutral]
     ].
 
+board_play_move(Board) :-
+    Board = [
+        [[blue, 1], neutral, neutral, [blue, 1], neutral],
+        [neutral, neutral, neutral, [white, 1], [white, 1]],
+        [neutral, neutral, [blue, 1], neutral, neutral],
+        [neutral, [white, 1], neutral, neutral, neutral],
+        [[blue, 1], neutral, neutral, neutral, [white, 1]]
+    ].
+
 % replace(+Board, +X, +Y, +Piece, -NewBoard)
 % Replaces the piece at the given coordinates. Y is list relative, not coordinate relative.
 replace([], _, _, _, []).
