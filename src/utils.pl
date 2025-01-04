@@ -12,14 +12,14 @@ clear :- write('\33\[2J').
 count([], 0).
 count([H | T], N) :- count(T, N1), N is N1 + 1.
 
-% make_space(+N, -Space)
-% Creates a string with N spaces.
-make_space(0, '').
-make_space(N, Space) :-
+% dup_char(+N, +Char, -Sequence)
+% Creates a sequence of n repeated characters.
+dup_char(0, _, '').
+dup_char(N, Char, Sequence) :-
     N > 0,
     N1 is N - 1,
-    make_space(N1, Space1),
-    atom_concat(' ', Space1, Space).
+    dup_char(N1, Char, Sequence1),
+    atom_concat(Char, Sequence1, Sequence).
 
 % ----------------------------- %
 % Board Manipulation Predicates %
