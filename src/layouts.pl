@@ -59,16 +59,16 @@ display_game(GameState) :-
     % Player Info Layout
     atom_length(BluePlayerName, BCount), atom_length(WhitePlayerName, WCount),
     BSpaceN is 15 - BCount, WSpaceN is 15 - WCount,
-    make_space(BSpaceN, BSpace), make_space(WSpaceN, WSpace),
+    dup_char(BSpaceN, ' ', BSpace), make_space(WSpaceN, WSpace),
     nl, write(BluePlayerName), write(BSpace), write(' B | '), write(RemainingBlue),
     nl, write(WhitePlayerName), write(WSpace), write(' W | '), write(RemainingWhite).
 
-% current_player\0
+% current_player(+CurrentPlayer, +BluePlayer, +WhitePlayer)
 % Displays the current player to the screen.
-current_player :-
+current_player(CurrentPlayer, [_, BluePlayerName], [_, WhitePlayerName]) :-
     nl, nl, write('Current Turn: '),
     (CurrentPlayer = blue -> write(BluePlayerName) ;
-     CurrentPlayer = white -> write(WhitePlayerName)), nl.
+     CurrentPlayer = white -> write(WhitePlayerName)).
 
 % layout_board(+Board, +RowNumber)
 % Prints the board layout to the screen.
