@@ -3,7 +3,8 @@
 
 :- include('utils.pl').
 :- include('input.pl').
-:- include('output.pl').
+:- include('config.pl').
+:- include('layouts.pl').
 
 % --------------- %
 % PLAY Predicates %
@@ -14,7 +15,9 @@
 play :-
     % Create the GameConfig and initial GameState.
     create_config(GameConfig),
-    initial_state(GameConfig, GameState), skip_line,
+    initial_state(GameConfig, GameState),
+    % Clear input stream.
+    skip_line,
     % Run the game loop.
     game_loop(GameState).
 
@@ -27,7 +30,7 @@ game_loop(GameState) :-
     display_game(GameState),
     (
         % Players are placing their pieces.
-        Winner == 0 -> place_loop(GameState, NewGameState), game_loop(NewGameState, Winner) ;
+        Winner == 0 -> place_loop(GameState, NewGameState), game_loop(NewGameState) ;
         % Players are moving their pieces.
         Winner == 1 -> move_loop(GameState, NewGameState), game_loop(NewGameState) ;
         % Game is over, time to display the winner.
@@ -41,8 +44,12 @@ game_loop(GameState) :-
 place_loop(GameState, NewGameState) :-
     % GameState expansion for easier access.
     GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite],
+    % Display the players information.
+    player_info(GameState),
+    % Display the current player and the remaining pieces.
+    current_player(GameState),
     % Display the instructions for placing a new piece.
-    nl, write('To place a new piece, enter the coordinates in the format: X Y'), nl,
+    nl, nl, write('To place a new piece, enter the coordinates in the format: X Y'), nl,
     % Loop to check for valid placements.
     repeat,
         % Ask the user to enter valid coordinates.
@@ -55,16 +62,23 @@ place_loop(GameState, NewGameState) :-
             % Invalid move, so display an error message.
             nl, write('Invalid placement.'), nl, fail ;
             % Valid move, so place the piece.
-            move(GameState, Move, NewGameState), !).
+            move(GameState, Move, [NewBoard, NewCurrentPlayer, _, _, _, _]),
+            (CurrentPlayer == blue -> NewRemainingBlue is RemainingBlue - 1, NewRemainingWhite = RemainingWhite ;
+             CurrentPlayer == white -> NewRemainingWhite is RemainingWhite - 1, NewRemainingBlue = RemainingBlue),
+            NewGameState = [NewBoard, NewCurrentPlayer, BluePlayer, WhitePlayer, NewRemainingBlue, NewRemainingWhite], !).
 
 % move_loop(+GameState, -NewGameState)
 % Loop that is executed while the players are moving their pieces.
 move_loop(GameState, NewGameState) :-
     % GameState expansion for easier access.
     GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite],
+    % Display the players information.
+    player_info(GameState),
+    % Display the current player and the remaining pieces.
+    current_player(GameState),
     % Display the instructions for moving a piece.
-    nl, write('To move a piece, enter the coordinates of the piece to move and the direction in the format "X Y A/W/S/D".'),
-    nl, write('A: Up, W: Down, S: Left, D: Right.'), nl,
+    nl, write('To move a piece, enter the coordinates of the piece'), nl,
+    write('  to move and the direction in the format "X Y [A/W/S/D]".'), nl,
     % Loop to check for valid placements.
     repeat,
         % Ask the user for the coordinates.
@@ -273,7 +287,8 @@ value_cell([Player, Height], _, -Height).
 % Checks if the game is over and returns the winner.
 game_over(GameState, Winner) :-
     GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite],
-    (RemainingBlue \= 0 ; RemainingWhite \= 0 -> Winner = 0, ! ;
+    (RemainingBlue \= 0 -> Winner = 0, ! ;
+     RemainingWhite \= 0 -> Winner = 0, ! ;
         valid_moves(GameState, ListOfMovesP1),
         (CurrentPlayer == blue -> OtherPlayer = white ; OtherPlayer = blue),
         valid_moves([Board, OtherPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite], ListOfMovesP2),
@@ -296,4 +311,4 @@ game_over(GameState, Winner) :-
     the game state as determined by the value/3 predicate. For human players, it should interact with
     the user to read the move.
 */
-choose_move(+GameState, +Player, -Move).
+% choose_move(+GameState, +Player, -Move)
