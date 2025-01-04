@@ -50,7 +50,7 @@ initial_state(GameConfig, GameState) :-
 
 % player_config(+GameConfig, -BluePlayer, -WhitePlayer)
 % Returns the player configuration based on the given game configuration.
-player_config([1, _, BluePlayerName, WhitePlayerName], ['H', BluePlayerName], ['H', WhitePlayerName]).
-player_config([2, _, BluePlayerName, WhitePlayerName], ['H', BluePlayerName], ['C', WhitePlayerName]).
-player_config([3, _, BluePlayerName, WhitePlayerName], ['C', BluePlayerName], ['H', WhitePlayerName]).
-player_config([4, _, BluePlayerName, WhitePlayerName], ['C', BluePlayerName], ['C', WhitePlayerName]).
+player_config([1, _, BluePlayerName, WhitePlayerName], [human, BluePlayerName], [human, WhitePlayerName]).
+player_config([2, _, BluePlayerName, WhitePlayerName], [human, BluePlayerName], [computer, WhitePlayerName]).
+player_config([3, _, BluePlayerName, WhitePlayerName], [computer, BluePlayerName], [human, WhitePlayerName]).
+player_config([4, _, BluePlayerName, WhitePlayerName], [computer, BluePlayerName], [computer, WhitePlayerName]).
