@@ -51,10 +51,13 @@ layout_player_name(PlayerColor) :-
 % Displays the game state to the screen.
 display_game(GameState) :-
     GameState = [Board, _, _, _, _, _],
+    % Display the board layout.
     clear, nl,
     write('  |---|---|---|---|---|'), nl,
     layout_board(Board, 5),
-    write('    1   2   3   4   5  '), nl.
+    write('    1   2   3   4   5  '), nl,
+    % Display the players information.
+    player_info(GameState).
 
 % layout_board(+Board, +RowNumber)
 % Prints the board layout to the screen.
@@ -108,13 +111,25 @@ current_player(GameState) :-
     (CurrentPlayer = blue -> write(BluePlayerName) ;
      CurrentPlayer = white -> write(WhitePlayerName)).
 
+% show_player_pieces(+Board, +Player, +BluePlayerName, +WhitePlayerName)
+% Displays the player's pieces coordinates and heights to the screen.
+show_player_pieces(Board, Player, BluePlayerName, WhitePlayerName) :-
+    % Get the list of pieces for the player.
+    player_pieces(Board, Player, 1, ListOfPieces),
+    % Sort the list of pieces by height.
+    samsort(sort_pieces, ListOfPieces, ListOfPiecesSorted),
+    % Display the list of pieces to the screen.
+    nl, nl, (Player = blue -> write(BluePlayerName) ; write(WhitePlayerName)),
+    write(' Pieces: [X,Y,H]'),
+    nl, nl, write('    '), write(ListOfPiecesSorted).
+
 % ------------------ %
 % Game Winner Layout %
 % ------------------ %
 
+% display_winner(+GameState, +Winner)
+% Displays the winner to the screen.
 display_winner(GameState, Winner) :-
-    % Display the players information.
-    player_info(GameState),
     % Display the winner to the screen.
     nl, nl, write(' --- GAME OVER ---'),
     (Winner = draw -> nl, nl, write('Wow! The game ended in a draw.'), nl, nl ;
