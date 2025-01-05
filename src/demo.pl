@@ -4,7 +4,7 @@
 
 % play_move\0
 % Predicate to demo the move stage of the game.
-play_move_0 :-
+play_move :-
     play_move_board(Board),
     GameConfig = [1, 0, 'Blue', 'White'],
     GameState = [Board, blue, [human, 'Blue'], [human, 'White'], 0, 0],
