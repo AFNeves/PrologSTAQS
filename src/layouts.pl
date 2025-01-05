@@ -43,9 +43,9 @@ layout_player_name(PlayerColor) :-
     write('Please enter the player\'s name'), nl, nl,
     write('Player ').
 
-% ---------------- %
-% GameLoop Layouts %
-% ---------------- %
+% --------------------- %
+% General Board Layouts %
+% --------------------- %
 
 % display_game(+GameState)
 % Displays the game state to the screen.
@@ -55,33 +55,6 @@ display_game(GameState) :-
     write('  |---|---|---|---|---|'), nl,
     layout_board(Board, 5),
     write('    1   2   3   4   5  '), nl.
-
-% player_info(+GameState)
-% Displays the player information to the screen.
-player_info(GameState) :-
-    % GameState expansion for easier access.
-    GameState = [_, _, [_, BluePlayerName], [_, WhitePlayerName], RemainingBlue, RemainingWhite],
-    % Calculate the number of spaces needed to align the player names.
-    atom_length(BluePlayerName, BCount), atom_length(WhitePlayerName, WCount),
-    BSpaceN is 11 - BCount, WSpaceN is 11 - WCount,
-    dup_char(BSpaceN, ' ', BSpace), dup_char(WSpaceN, ' ', WSpace),
-    % Fetch the game score.
-    value(GameState, blue, BlueValue), value(GameState, white, WhiteValue),
-    % Write the player information to the screen.
-    nl, write(BluePlayerName), write(BSpace), write(' B | '), write(RemainingBlue), write(' | '), write(BlueValue),
-    nl, write(WhitePlayerName), write(WSpace), write(' W | '), write(RemainingWhite), write(' | '), write(WhiteValue).
-
-% current_player(+GameState)
-% Displays the current player to the screen.
-current_player(GameState) :-
-    GameState = [_, CurrentPlayer, [_, BluePlayerName], [_, WhitePlayerName], _, _],
-    nl, nl, write('Current Turn: '),
-    (CurrentPlayer = blue -> write(BluePlayerName) ;
-     CurrentPlayer = white -> write(WhitePlayerName)).
-
-% ------------- %
-% Board Layouts %
-% ------------- %
 
 % layout_board(+Board, +RowNumber)
 % Prints the board layout to the screen.
@@ -107,6 +80,33 @@ layout_row([Cell | Rest]) :-
 % Prints the division line to the screen.
 layout_division_line :-
     write('  |---|---|---|---|---|'), nl.
+
+% ----------------- %
+% Game Info Layouts %
+% ----------------- %
+
+% player_info(+GameState)
+% Displays the player information to the screen.
+player_info(GameState) :-
+    % GameState expansion for easier access.
+    GameState = [_, _, [_, BluePlayerName], [_, WhitePlayerName], RemainingBlue, RemainingWhite],
+    % Calculate the number of spaces needed to align the player names.
+    atom_length(BluePlayerName, BCount), atom_length(WhitePlayerName, WCount),
+    BSpaceN is 11 - BCount, WSpaceN is 11 - WCount,
+    dup_char(BSpaceN, ' ', BSpace), dup_char(WSpaceN, ' ', WSpace),
+    % Fetch the game score.
+    value(GameState, blue, BlueValue), value(GameState, white, WhiteValue),
+    % Write the player information to the screen.
+    nl, write(BluePlayerName), write(BSpace), write(' B | '), write(RemainingBlue), write(' | '), write(BlueValue),
+    nl, write(WhitePlayerName), write(WSpace), write(' W | '), write(RemainingWhite), write(' | '), write(WhiteValue).
+
+% current_player(+GameState)
+% Displays the current player to the screen.
+current_player(GameState) :-
+    GameState = [_, CurrentPlayer, [_, BluePlayerName], [_, WhitePlayerName], _, _],
+    nl, nl, write('Current Turn: '),
+    (CurrentPlayer = blue -> write(BluePlayerName) ;
+     CurrentPlayer = white -> write(WhitePlayerName)).
 
 % ------------------ %
 % Game Winner Layout %
