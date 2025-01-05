@@ -1,8 +1,6 @@
 % ------------------ %
-% Layouts Predicates %
+% GameConfig Layouts %
 % ------------------ %
-
-/* Game Config Layouts */
 
 % layout_game_mode/0
 % Prints the Game Mode Selector layout to the screen.
@@ -45,7 +43,9 @@ layout_player_name(PlayerColor) :-
     write('Please enter the player\'s name'), nl, nl,
     write('Player ').
 
-/* Game Loop Layouts */
+% ---------------- %
+% GameLoop Layouts %
+% ---------------- %
 
 % display_game(+GameState)
 % Displays the game state to the screen.
@@ -79,6 +79,10 @@ current_player(GameState) :-
     (CurrentPlayer = blue -> write(BluePlayerName) ;
      CurrentPlayer = white -> write(WhitePlayerName)).
 
+% ------------- %
+% Board Layouts %
+% ------------- %
+
 % layout_board(+Board, +RowNumber)
 % Prints the board layout to the screen.
 layout_board([], _).
@@ -104,7 +108,9 @@ layout_row([Cell | Rest]) :-
 layout_division_line :-
     write('  |---|---|---|---|---|'), nl.
 
-/* Game Winner Layout */
+% ------------------ %
+% Game Winner Layout %
+% ------------------ %
 
 display_winner(GameState, Winner) :-
     % Display the players information.
