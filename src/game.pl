@@ -86,15 +86,16 @@ move_loop([_, Difficulty, _, _], GameState, NewGameState) :-
 % Predicate that is executed when the player is out of moves.
 pass_move(GameState, NewGameState) :-
     % GameState expansion for easier access.
-    GameState = [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite],
+    GameState = [Board, CurrentPlayer, [BType, BName], [WType, WName], RemainingBlue, RemainingWhite],
     % Display the current player and the remaining pieces.
     current_player(GameState),
     % Display the pass message.
     nl, nl, write('Looks like you are out of moves!'),
-    nl, nl, write('Press any key to continue...'), skip_line,
+    (CurrentPlayer == blue, BType == human -> nl, nl, write('Press any key to continue...'), skip_line ;
+     CurrentPlayer == white, WType == human -> nl, nl, write('Press any key to continue...'), skip_line),
     % Change the player.
     change_player(CurrentPlayer, NewCurrentPlayer),
-    NewGameState = [Board, NewCurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite].
+    NewGameState = [Board, NewCurrentPlayer, [BType, BName], [WType, WName], RemainingBlue, RemainingWhite].
 
 % --------------------- %
 % Move Piece Predicates %
@@ -285,9 +286,9 @@ pos_value_check(Board, CordX, CordY, PositionalValue) :-
 
 % pos_value_cell(+Cell, -PositionalValue)
 % Returns the positional value of the given cell.
-pos_value_cell(empty, -2).
+pos_value_cell(empty, -1).
 pos_value_cell(neutral, 2).
-pos_value_cell([Player, Height], -1).
+pos_value_cell([_, _], 1).
 
 % ------------------------ %
 % Player Pieces Predicates %
@@ -333,10 +334,10 @@ game_over(GameState, Winner) :-
         valid_moves([Board, OtherPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite], ListOfMovesP2),
         (ListOfMovesP1 \= [] -> Winner = 1 , ! ;
          ListOfMovesP1 == [], ListOfMovesP2 \= [] -> Winner = 2, ! ;
-         value(GameState, blue, Score),
-          (Score > 0 -> Winner = blue, ! ;
-           Score < 0 -> Winner = white, ! ;
-           Winner = draw))).
+         value(GameState, blue, BScore), value(GameState, white, WScore),
+          (BScore == WScore -> Winner = draw ;
+           BScore > WScore -> Winner = blue ;
+           Winner = white))).
 
 % ---------------------- %
 % Choose Move Predicates %
@@ -403,7 +404,7 @@ choose_move([Board, CurrentPlayer, BPlayer, WPlayer, 0, 0], 2, Move) :-
     sort(ListOfValues, SortedListOfValues),
     % Get the best move.
     last(SortedListOfValues, [_, Move]).
-choose_move([Board, _, _, _, RemainingBlue, RemainingWhite], _, Move) :-
+choose_move([Board, _, _, _, _, _], _, Move) :-
     % Loop until a valid move is generated.
     repeat,
         % Generate the X and Y coordinates.
