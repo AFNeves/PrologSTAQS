@@ -25,3 +25,7 @@ dup_char(N, Char, Sequence) :-
 % Changes the current player to the next player.
 change_player(CurrentPlayer, NextPlayer) :-
     (CurrentPlayer == blue -> NextPlayer = white ; NextPlayer = blue).
+
+% sort_pieces(+Piece1, +Piece2)
+% Comparator predicate for sorting the player's pieces.
+sort_pieces([_, _, H1], [_, _, H2]) :- H1 > H2.
