@@ -132,7 +132,7 @@ show_player_pieces(Board, Player, BluePlayerName, WhitePlayerName) :-
 display_winner(GameState, Winner) :-
     % Display the winner to the screen.
     nl, nl, write(' --- GAME OVER ---'),
-    (Winner = draw -> nl, nl, write('Wow! The game ended in a draw.'), nl, nl ;
+    (Winner = draw -> nl, nl, write('Wow! The game ended in a draw.'), nl ;
         GameState = [_, _, [_, BluePlayerName], [_, WhitePlayerName], _, _],
         nl, nl, write('The winner is: '),
         (Winner = blue -> write(BluePlayerName) ; write(WhitePlayerName)),
