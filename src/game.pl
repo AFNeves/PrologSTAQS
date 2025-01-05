@@ -255,6 +255,40 @@ value_cell(neutral, _, 0).
 value_cell([Player, Height], Player, Value) :- Value is Height * Height.
 value_cell([Player, _], NotPlayer, 0) :- Player \= NotPlayer.
 
+% --------------------------- %
+% Positional Value Predicates %
+% --------------------------- %
+
+% positional_value(+GameState, +Move, -PositionalValue)
+% Returns the positional value of the move.
+positional_value(GameState, [CordX, CordY, Direction], PositionalValue) :-
+    ActualY is 6 - CordY,
+    GameState = [Board, _, _, _, _, _],
+    (Direction == up    -> NewCordY is ActualY - 1, NewCordX is CordX ;
+     Direction == down  -> NewCordY is ActualY + 1, NewCordX is CordX ;
+     Direction == left  -> NewCordY is CordY, NewCordX is CordX - 1 ;
+     Direction == right -> NewCordY is CordY, NewCordX is CordX + 1),
+    pos_value_check(Board, NewCordX, NewCordY, PositionalValue).
+
+% positional_value_board(+Board, +CordX, +CordY, -PositionalValue)
+% Returns the positional value of the given coordinates.
+pos_value_check(Board, CordX, CordY, PositionalValue) :-
+    UpX is CordX, UpY is CordY - 1,
+    DownX is CordX, DownY is CordY + 1,
+    LeftX is CordX - 1, LeftY is CordY,
+    RightX is CordX + 1, RightY is CordY,
+    (CordY \= 1 -> nth1(UpY, Board, RowUp), nth1(UpX, RowUp, CellUp), pos_value_cell(CellUp, CellUpValue) ; CellUpValue = 0),
+    (CordY \= 5 -> nth1(DownY, Board, RowDown), nth1(DownX, RowDown, CellDown), pos_value_cell(CellDown, CellDownValue) ; CellDownValue = 0),
+    (CordX \= 1 -> nth1(LeftY, Board, RowLeft), nth1(LeftX, RowLeft, CellLeft), pos_value_cell(CellLeft, CellLeftValue) ; CellLeftValue = 0),
+    (CordX \= 5 -> nth1(RightY, Board, RowRight), nth1(RightX, RowRight, CellRight), pos_value_cell(CellRight, CellRightValue) ; CellRightValue = 0),
+    PositionalValue is CellUpValue + CellDownValue + CellLeftValue + CellRightValue.
+
+% pos_value_cell(+Cell, -PositionalValue)
+% Returns the positional value of the given cell.
+pos_value_cell(empty, -2).
+pos_value_cell(neutral, 2).
+pos_value_cell([Player, Height], -1).
+
 % ------------------------ %
 % Player Pieces Predicates %
 % ------------------------ %
@@ -359,7 +393,9 @@ choose_move([Board, CurrentPlayer, BPlayer, WPlayer, 0, 0], 2, Move) :-
         (
             member(Move, ListOfMoves),
             move(GameState, Move, NewGameState),
-            value(NewGameState, CurrentPlayer, Value)
+            value(NewGameState, CurrentPlayer, ScoreValue),
+            positional_value(GameState, Move, PositionalValue),
+            Value is ScoreValue + PositionalValue
         ),
         ListOfValues
     ),
