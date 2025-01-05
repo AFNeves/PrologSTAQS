@@ -1,93 +1,130 @@
 # PrologSTAQS
 
+## Identification
 
+**Topic:** *STAQS: A Strategic Two-Player Board Game* <br>
+**Group:**
+* **Name:** STAQS_5
+* **Student:** Afonso Machado Neves, [up202108884@up.pt](mailto:up202108884@up.pt)
 
-## Getting started
+Project solely developed by Afonso Machado Neves, for the *Functional and Logic Programming* course unit, in the context of the Bachelor's in *Informatics and Computing Engineering* at *FEUP*.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Installation and Execution
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+In order to play the game, follow these steps:
 
-## Add your files
+1. Install [*SICStus Prolog 4.9*](https://sicstus.sics.se/download4.html)
+2. Download the ***src*** folder from the ZIP archive.
+3. Open *SICStus Prolog* and consult the ***game.pl*** file.
+4. Run the play\0 predicate:
+   ```prolog
+   ?- play.
+   ```
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## Game Description
 
+**STAQS** is a strategic two-player board game played on a 5x5 grid in which players take turns moving their stacks one step at a time, aiming to create the tallest stack on the board. The game combines elements of territory control and vertical stacking, challenging players to outmaneuver their opponent through clever positioning and stack building. The game ends when no more moves are possible, and victory goes to the player who controls the tallest stack.
+
+### Components
+* 25 neutral stackable pieces.
+* 4 blue stackable pieces.
+* 4 white stackable pieces.
+
+### Setup
+1. Arrange the 25 neutral pieces into a 5x5 grid.
+2. Players select their color: blue or white.
+3. Blue goes first, and players alternate turns to place one of their pieces on top of a neutral piece.
+
+### Gameplay
+1. Players take turns moving their stacks, one step at a time onto an adjacent neutral piece.
+2. Movement must be orthogonal (up, down, left, or right). Stacks cannot jump over other stacks or move into empty spaces.
+3. A player passes if they cannot make a valid move. If both players pass consecutively, the game ends.
+
+### Winning Conditions
+1. The player controlling the tallest stack wins.
+2. If tied, the player with the most stacks of that height wins.
+3. Further ties are resolved by comparing the next tallest stacks, continuing until a winner is found.
+
+### References
+- [BoardGameGeek STAQS Website](https://boardgamegeek.com/boardgame/425529/staqs)
+
+## Considerations for Game Extensions
+
+Since the game is relatively simple, there were several considerations for extending the game to make it more challenging and engaging for players. Unfortunately, due to time and manpower constraints, these features were not implemented in the current version of the game. However, they could be considered for future development:
+
+1. **Variable Board Sizes:** Allow players to choose different board sizes.
+
+2. **Advanced AI:** Implement more sophisticated AI algorithms to provide a greater challenge for players.
+
+3. **Time Limits:** Add time limits for each player's turn to increase the pace of the game and prevent players from taking too long to make a move.
+
+4. **Blockades:** Introduce the concept of blockades, where players can block their opponent's movement by placing special pieces on the board.
+
+## Game Logic
+
+This section provides an overview of the game logic implemented in Prolog, including the game representation, internal state representation, move representation, and user interaction.
+
+### Game Configuration Representation
+To set up the game, the player must select the game mode, difficulty, and player names. The game configuration is represented as a list containing such information in the following format:
+```prolog
+[GameMode, Difficulty, BluePlayerName, WhitePlayerName]
 ```
-cd existing_repo
-git remote add origin https://gitlab.up.pt/up202108884/prolog-staqs.git
-git branch -M main
-git push -uf origin main
+This structure is used by the `initial_state/2` predicate to set up the initial game state, as well as the game loops to fetch the game difficulty.
+
+### Internal Game State Representation
+The most central aspect of the game logic is the internal game state representation, which includes the **board**, **current player**, **player information**, and **remaining pieces**. The `GameState` is represented as a list containing the following elements:
+```prolog
+[Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite]
 ```
+This structure contains the folowing elements:
+- Board: A 5x5 grid represented as a list of lists, each containing the stack information for each cell. The pieces are represented as atoms, such as `empty`, `neutral`, or a list of the player color and stack height, such as `[blue, 2]`.
 
-## Integrate with your tools
+- Current Player: The player whose turn it is to move. The player is represented as an atom, either `blue` or `white`.
 
-- [ ] [Set up project integrations](https://gitlab.up.pt/up202108884/prolog-staqs/-/settings/integrations)
+- Blue/White Player: A list containing the player type and name for each player. The player type can be `human` or `computer`, and the name is a string.
 
-## Collaborate with your team
+- Remaining Blue/White: The number of remaining pieces for each player.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### Game State Transitions
 
-## Test and Deploy
+The `GameState` is updated by applying moves to the board and changing the current player. During the game, the state transitions through the following steps:
 
-Use the built-in continuous integration in GitLab.
+- Initial: `[[neutral, neutral, ...], blue, [human, 'Blue'], [human, 'White'], 4, 4]`
+- Placing: `[[[blue, 1], neutral, neutral, ...], white, [human, 'Blue'], [human, 'White'], 1, 2]`
+- Moving: `[[empty, [blue, 2], neutral, ...], white, [human, 'Blue'], [human, 'White'], 0, 0]`
+- Final: `[[empty, empty, empty, ...], blue, [human, 'Blue'], [human, 'White'], 0, 0]`
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### Move Representation
+Since the game is separated in the placing and moving phases, moves are represented differently depending on the phase. The `move/3` predicate is responsible for updating the game state based on the move provided by the player. The move representation is as follows:
 
-***
+- Placing: `[CordX, CordY]`
+- Moving: `[CordX, CordY, Direction]`
 
-# Editing this README
+Since the board has coordinates (1,1) on the bottom-left corner, the move\3 and other predicates must convert the CordY to 6 - CordY, so the coordinates are correctly represented when handling the matrix.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### User Interaction
+Both the `GameMode Selector`, `Difficulty Selector`, and `PlayerName Selector` predicates are responsible for fetching the user input and setting up the game configuration using the `read_and_validate_int\2` and `read_and_validate_string\2` predicates. This predicates ensure that the user input is valid and within the expected range or format depending on the context.
 
-## Suggestions for a good README
+Later on, the `read_and_validate_place\1` and `read_and_validate_move\1` predicates are responsible for fetching the user input during the placing and moving phases, respectively. These predicates ensure that the user input is valid and within the expected range and also validate the move based on the current game state.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Conclusions
 
-## Name
-Choose a self-explaining name for your project.
+With this project, I was able to develop a fully functional two-player board game in Prolog, implementing the game logic, user interface, and greedy algorithm for the computer player.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### Limitations
+- The game currently supports only a 5x5 board.
+- Limited AI capabilities for computer players.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### Issues
+- Currently, the game has a bug where the computer player may "eat" an opponent's stack, which is not allowed by the game rules. Unfortunately, I was unable to identify the source of this bug, since it only occurs in specific situations.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### Future Improvements
+Since the group project was developed individually, additional features were unable to be implemented due to time and manpower constraints. As explained in the [*Considerations for Game Extensions*](#considerations-for-game-extensions) section, several features could be added to enhance the game experience and make it more challenging for players.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Bibliography
+- [PFL Lecture Slides](https://moodle2425.up.pt/course/view.php?id=4040)
+- [SICStus Prolog Documentation](https://sicstus.sics.se/documentation.html)
+- [Stack Overflow](https://stackoverflow.com/)
+- [ChatGPT](https://chatgpt.com/) and [GitHub Copilot](https://github.com/features/copilot) were used for the following tasks:
+    - Fix bugs in the *game.pl* file, most notably in the `move/3`, `valid_moves/3`, and `game_over/1` predicates.
+    - Fix grammatical errors and improve the overall quality of the README file.
