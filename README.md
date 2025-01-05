@@ -85,8 +85,6 @@ This structure contains the following elements:
 
 - Remaining Blue/White: The number of remaining pieces for each player.
 
-### Game State Transitions
-
 The `GameState` is updated by applying moves to the board and changing the current player. During the game, the state transitions through the following steps:
 
 - Initial: `[[neutral, neutral, ...], blue, [human, 'Blue'], [human, 'White'], 4, 4]`
@@ -122,13 +120,16 @@ With this project, I was able to develop a fully functional two-player board gam
 Since the group project was developed individually, additional features were unable to be implemented due to time and manpower constraints. As explained in the [*Considerations for Game Extensions*](#considerations-for-game-extensions) section, several features could be added to enhance the game experience and make it more challenging for players.
 
 ## Bibliography
-- [PFL Lecture Slides](https://moodle2425.up.pt/course/view.php?id=4040)
-- [SICStus Prolog Documentation](https://sicstus.sics.se/documentation.html)
-- [Stack Overflow](https://stackoverflow.com/)
-- [Grammarly](https://app.grammarly.com)
-- [ChatGPT](https://chatgpt.com/) and [GitHub Copilot](https://github.com/features/copilot) were used for the following tasks:
-    - Fix bugs in the *game.pl* file, most notably in the `move/3`, `valid_moves/3`, and `game_over/1` predicates.
-    - Fix grammatical errors and improve the overall quality of the README file.
+- Spell Checking
+    - [Grammarly](https://app.grammarly.com)
+- Prolog Documentation
+  - [Stack Overflow](https://stackoverflow.com/)
+  - [PFL Lecture Slides](https://moodle2425.up.pt/course/view.php?id=4040)
+  - [SICStus Prolog Documentation](https://sicstus.sics.se/documentation.html)
+- AI Assistance
+  - [ChatGPT](https://chatgpt.com/) and [GitHub Copilot](https://github.com/features/copilot) were used for the following tasks:
+      - Fix bugs in the *game.pl* file, most notably in the `move/3`, `valid_moves/3`, and `game_over/1` predicates.
+      - Fix grammatical errors and improve the overall quality of the README file.
 
 ## Annexes
 
