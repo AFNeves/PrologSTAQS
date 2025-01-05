@@ -137,23 +137,23 @@ In this section, you can find screenshots of the game interface during the diffe
 
 <div style="text-align: center; max-width: 650px; margin: auto;">
 <h3>Main Menu</h3>
-<img src="images/main_menu.png" alt="Main Menu" style="max-width: 300px;" />
+<img src="docs/images/main_menu.png" alt="Main Menu" style="max-width: 300px;" />
 </div>
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 650px; margin: auto;">
 <div style="text-align: center;">
 <h3>Placing Phase</h3>
-<img src="images/placing.png" alt="Placing Phase" style="max-width: 300px;" />
+<img src="docs/images/placing.png" alt="Placing Phase" style="max-width: 300px;" />
 </div>
 <div style="text-align: center;">
 <h3>Moving Phase</h3>
-<img src="images/moving.png" alt="Moving Phase" style="max-width: 300px;" />
+<img src="docs/images/moving.png" alt="Moving Phase" style="max-width: 300px;" />
 </div>
 <div style="text-align: center;">
 <h3>Final Moments</h3>
-<img src="images/final.png" alt="Final Moments" style="max-width: 300px;" />
+<img src="docs/images/final.png" alt="Final Moments" style="max-width: 300px;" />
 </div>
 <div style="text-align: center;">
 <h3>Game Over</h3>
-<img src="images/winner.png" alt="Game Over" style="max-width: 300px;" />
+<img src="docs/images/winner.png" alt="Game Over" style="max-width: 300px;" />
 </div>
 </div>
