@@ -167,7 +167,7 @@ valid_moves(GameState, ListOfMoves) :-
     GameState = [Board, CurrentPlayer, _, _, _, _],
     horizontal_moves(Board, 5, CurrentPlayer, HorizontalMoves),
     transpose(Board, TransposedBoard),
-    horizontal_moves(TransposedBoard, 1, CurrentPlayer, VerticalMoves),
+    vertical_moves(TransposedBoard, 1, CurrentPlayer, VerticalMoves),
     append(HorizontalMoves, VerticalMoves, ListOfMoves).
 
 /* Horizontal Moves */
@@ -342,7 +342,9 @@ choose_move([Board, CurrentPlayer, _, _, _, _], 0, Move) :-
 % --------------- %
 % COMPUTER PLAYER %
 % --------------- %
-choose_move([Board, _, _, _, 0, 0], 1, Move) :-
+choose_move([Board, CurrentPlayer, BPlayer, WPlayer, 0, 0], 1, Move) :-
+    % GameState reconstruction.
+    GameState = [Board, CurrentPlayer, BPlayer, WPlayer, 0, 0],
     % Find all valid moves.
     valid_moves(GameState, ListOfMoves),
     % Choose a random move from the list.
