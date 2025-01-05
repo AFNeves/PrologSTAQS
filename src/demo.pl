@@ -33,7 +33,7 @@ play_move(4, Level) :-
 % play_final(+GameMode, +Level)
 % Predicate to demo the final stage of the game.
 play_final(1) :- play_final(1, 0).
-play_final_(1, 0) :-
+play_final(1, 0) :-
     play_final_board(Board),
     GameConfig = [1, 0, 'Blue', 'White'],
     GameState = [Board, blue, [human, 'Blue'], [human, 'White'], 0, 0],
