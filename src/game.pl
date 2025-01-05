@@ -309,52 +309,7 @@ game_over(GameState, Winner) :-
 % ---------------------- %
 
 % choose_move(+GameState, +Level, -Move)
-% Chooses the move for the computer player.
-% --------------- %
-% COMPUTER PLAYER %
-% --------------- %
-choose_move([Board, _, _, _, 0, 0], 1, Move) :-
-    % Find all valid moves.
-    valid_moves(GameState, ListOfMoves),
-    % Choose a random move from the list.
-    random_member(Move, ListOfMoves).
-choose_move([Board, CurrentPlayer, BPlayer, WPlayer, 0, 0], 2, Move) :-
-    % GameState expansion for easier access.
-    GameState = [Board, CurrentPlayer, BPlayer, WPlayer, 0, 0],
-    % Find all valid moves.
-    valid_moves(GameState, ListOfMoves),
-    findall(
-        [Value, Move],
-        (
-            member(Move, ListOfMoves),
-            move(GameState, Move, NewGameState),
-            value(NewGameState, CurrentPlayer, Value)
-        ),
-        ListOfValues
-    ),
-    % Sort the list of values.
-    sort(ListOfValues, SortedListOfValues),
-    % Get the best move.
-    last(SortedListOfValues, [_, Move]).
-choose_move([Board, _, _, _, RemainingBlue, RemainingWhite], 1, Move) :-
-    trace,
-    % Loop until a valid move is generated.
-    repeat,
-        % Generate the X and Y coordinates.
-        random(1, 6, CordX), random(1, 6, CordY),
-        % Check if the coordinates are valid.
-        validate_move(Board, _, [CordX, CordY], Valid),
-        % Exit the loop if the move is valid.
-        (Valid == true -> Move = [CordX, CordY], notrace ; fail).
-choose_move([Board, _, _, _, RemainingBlue, RemainingWhite], 2, Move) :-
-    % Loop until a valid move is generated.
-    repeat,
-        % Generate the X and Y coordinates.
-        random(1, 6, CordX), random(1, 6, CordY),
-        % Check if the coordinates are valid.
-        validate_move(Board, _, [CordX, CordY], Valid),
-        % Exit the loop if the move is valid.
-        (Valid == true -> Move = [CordX, CordY] ; fail).
+% Chooses the move for given player type and GameState.
 
 % ------------ %
 % HUMAN PLAYER %
@@ -383,3 +338,39 @@ choose_move([Board, CurrentPlayer, _, _, _, _], 0, Move) :-
         % Validate the move.
         validate_move(Board, CurrentPlayer, Move, Valid),
         (Valid == true -> ! ; nl, write('Invalid placement.'), nl, fail ).
+
+% --------------- %
+% COMPUTER PLAYER %
+% --------------- %
+choose_move([Board, _, _, _, 0, 0], 1, Move) :-
+    % Find all valid moves.
+    valid_moves(GameState, ListOfMoves),
+    % Choose a random move from the list.
+    random_member(Move, ListOfMoves).
+choose_move([Board, CurrentPlayer, BPlayer, WPlayer, 0, 0], 2, Move) :-
+    % GameState expansion for easier access.
+    GameState = [Board, CurrentPlayer, BPlayer, WPlayer, 0, 0],
+    % Find all valid moves.
+    valid_moves(GameState, ListOfMoves),
+    findall(
+        [Value, Move],
+        (
+            member(Move, ListOfMoves),
+            move(GameState, Move, NewGameState),
+            value(NewGameState, CurrentPlayer, Value)
+        ),
+        ListOfValues
+    ),
+    % Sort the list of values.
+    sort(ListOfValues, SortedListOfValues),
+    % Get the best move.
+    last(SortedListOfValues, [_, Move]).
+choose_move([Board, _, _, _, RemainingBlue, RemainingWhite], _, Move) :-
+    % Loop until a valid move is generated.
+    repeat,
+        % Generate the X and Y coordinates.
+        random(1, 6, CordX), random(1, 6, CordY),
+        % Check if the coordinates are valid.
+        validate_move(Board, _, [CordX, CordY], Valid),
+        % Exit the loop if the move is valid.
+        (Valid == true -> Move = [CordX, CordY] ; fail).
