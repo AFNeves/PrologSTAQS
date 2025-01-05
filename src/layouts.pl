@@ -103,3 +103,17 @@ layout_row([Cell | Rest]) :-
 % Prints the division line to the screen.
 layout_division_line :-
     write('  |---|---|---|---|---|'), nl.
+
+/* Game Winner Layout */
+
+display_winner(GameState, Winner) :-
+    % Display the players information.
+    player_info(GameState),
+    % Display the winner to the screen.
+    nl, nl, write(' --- GAME OVER ---'),
+    (Winner = draw -> nl, nl, write('Wow! The game ended in a draw.'), nl, nl ;
+        GameState = [_, _, [_, BluePlayerName], [_, WhitePlayerName], _, _],
+        nl, nl, write('The winner is: '),
+        (Winner = blue -> write(BluePlayerName) ; write(WhitePlayerName)),
+        nl, nl, write('Congratulations!'), nl),
+    nl, write(' -----------------'), nl, nl.
