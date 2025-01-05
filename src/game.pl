@@ -51,7 +51,7 @@ game_loop(GameConfig, GameState) :-
 % Loop that is executed while the players are placing their initial pieces.
 place_loop([_, Difficulty, _, _], GameState, NewGameState) :-
     % GameState expansion for easier access.
-    GameState = [Board, CurrentPlayer, [BType, BPlayerName], [WType, WPlayerName], RemainingBlue, RemainingWhite],
+    GameState = [_, CurrentPlayer, [BType, BPlayerName], [WType, WPlayerName], RemainingBlue, RemainingWhite],
     % Display the current player and the remaining pieces.
     current_player(GameState),
     % Choose the move for the current player.
@@ -69,7 +69,7 @@ place_loop([_, Difficulty, _, _], GameState, NewGameState) :-
 % Loop that is executed while the players are moving their pieces.
 move_loop([_, Difficulty, _, _], GameState, NewGameState) :-
     % GameState expansion for easier access.
-    GameState = [Board, CurrentPlayer, [BType, BPlayerName], [WType, WPlayerName], RemainingBlue, RemainingWhite],
+    GameState = [Board, CurrentPlayer, [BType, BPlayerName], [WType, WPlayerName], _, _],
     % Display the current player.
     current_player(GameState),
     % Display the current player's pieces.
@@ -124,7 +124,7 @@ check_owner(Board, CordX, CordY, CurrentPlayer, Valid) :-
 
 % validate_move(+Board, +CurrentPlayer, +Move, -Valid)
 % Validates the given move.
-validate_move(Board, CurrentPlayer, [CordX, CordY], Valid) :-
+validate_move(Board, _, [CordX, CordY], Valid) :-
     RowNumber is 6 - CordY,
     nth1(RowNumber, Board, Row),
     nth1(CordX, Row, Cell),
@@ -146,7 +146,7 @@ execute_move(Board, CurrentPlayer, [CordX, CordY], NewBoard) :-
     (CurrentPlayer == blue -> Piece = [blue, 1] ; Piece = [white, 1]),
     MatrixCordY is 6 - CordY,
     replace(Board, CordX, MatrixCordY, Piece, NewBoard).
-execute_move(Board, CurrentPlayer, [CordX, CordY, Direction], NewBoard) :-
+execute_move(Board, _, [CordX, CordY, Direction], NewBoard) :-
     MatrixCordY is 6 - CordY,
     nth1(MatrixCordY, Board, PieceRow),
     nth1(CordX, PieceRow, [Color, Height]), NewHeight is Height + 1,
@@ -253,7 +253,7 @@ value_row([Cell | Rest], Player, Value) :-
 value_cell(empty, _, 0).
 value_cell(neutral, _, 0).
 value_cell([Player, Height], Player, Value) :- Value is Height * Height.
-value_cell([Player, Height], NotPlayer, 0) :- Player \= NotPlayer.
+value_cell([Player, _], NotPlayer, 0) :- Player \= NotPlayer.
 
 % ------------------------ %
 % Player Pieces Predicates %
@@ -297,7 +297,6 @@ game_over(GameState, Winner) :-
         valid_moves(GameState, ListOfMovesP1),
         (CurrentPlayer == blue -> OtherPlayer = white ; OtherPlayer = blue),
         valid_moves([Board, OtherPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite], ListOfMovesP2),
-        append(ListOfMovesP1, ListOfMovesP2, ListOfMoves),
         (ListOfMovesP1 \= [] -> Winner = 1 , ! ;
          ListOfMovesP1 == [], ListOfMovesP2 \= [] -> Winner = 2, ! ;
          value(GameState, blue, Score),
@@ -335,10 +334,9 @@ choose_move(GameState, 2, Move) :-
     % Get the best move.
     last(SortedListOfValues, [_, Move]).
 % Chooses the move for the human player.
-choose_move([Board, CurrentPlayer, BluePlayer, WhitePlayer, 0, 0], 0, Move) :-
+choose_move([Board, CurrentPlayer, _, _, 0, 0], 0, Move) :-
     % Display the instructions for moving a piece.
-    nl, nl, write('To move a piece, enter the coordinates of the piece'), nl,
-    write('  to move and the direction in the format "X Y [A/W/S/D]".'), nl,
+    nl, nl, write('Please enter a move in the format: \'X Y [A/W/S/D]\''), nl,
     % Loop to check for valid placements.
     repeat,
         % Ask the user for the coordinates.
@@ -348,9 +346,9 @@ choose_move([Board, CurrentPlayer, BluePlayer, WhitePlayer, 0, 0], 0, Move) :-
         % Validate the move.
         validate_move(Board, CurrentPlayer, Move, Valid),
         (Valid == true -> ! ; nl, write('Invalid move.'), nl, fail).
-choose_move([Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite], 0, Move) :-
+choose_move([Board, CurrentPlayer, _, _, _, _], 0, Move) :-
     % Display the instructions for placing a new piece.
-    nl, nl, write('To place a new piece, enter the coordinates in the format: X Y'), nl,
+    nl, nl, write('Please enter a move in the format: \'X Y\''), nl,
     % Loop to check for valid placements.
     repeat,
         % Ask the user to enter valid coordinates.
