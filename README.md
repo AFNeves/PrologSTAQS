@@ -134,13 +134,25 @@ Since the group project was developed individually, additional features were una
 
 In this section, you can find screenshots of the game interface during the different phases of the game.
 
-### Main Menu
-<img src="images/main_menu.png" alt="Main Menu" style="max-width: 300px"/></img>
-### Placing Phase
-<img src="images/placing.png" alt="Placing Phase" style="max-width: 300px"/></img>
-### Moving Phase
-<img src="images/moving.png" alt="Moving Phase" style="max-width: 300px"/></img>
-### Final Moments
-<img src="images/final.png" alt="Final Moments" style="max-width: 300px"/></img>
-### Game Over
-<img src="images/winner.png" alt="Game Over" style="max-width: 300px"/></img>
+<div style="text-align: center; max-width: 650px; margin: auto;">
+  <h3>Main Menu</h3>
+  <img src="images/main_menu.png" alt="Main Menu" style="max-width: 300px;" />
+</div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 650px; margin: auto;">
+  <div style="text-align: center;">
+    <h3>Placing Phase</h3>
+    <img src="images/placing.png" alt="Placing Phase" style="max-width: 300px;" />
+  </div>
+  <div style="text-align: center;">
+    <h3>Moving Phase</h3>
+    <img src="images/moving.png" alt="Moving Phase" style="max-width: 300px;" />
+  </div>
+  <div style="text-align: center;">
+    <h3>Final Moments</h3>
+    <img src="images/final.png" alt="Final Moments" style="max-width: 300px;" />
+  </div>
+  <div style="text-align: center;">
+    <h3>Game Over</h3>
+    <img src="images/winner.png" alt="Game Over" style="max-width: 300px;" />
+  </div>
+</div>
