@@ -128,8 +128,8 @@ Since the group project was developed individually, additional features were una
   - [SICStus Prolog Documentation](https://sicstus.sics.se/documentation.html)
 - AI Assistance
   - [ChatGPT](https://chatgpt.com/) and [GitHub Copilot](https://github.com/features/copilot) were used for the following tasks:
-      - Fix bugs in the *game.pl* file, most notably in the `move/3`, `valid_moves/3`, and `game_over/1` predicates.
-      - Fix grammatical errors and improve the overall quality of the README file.
+    - Fix bugs in the *game.pl* file, most notably in the `move/3`, `valid_moves/3`, and `game_over/1` predicates.
+    - Fix grammatical errors and improve the overall quality of the README file.
 
 ## Annexes
 
