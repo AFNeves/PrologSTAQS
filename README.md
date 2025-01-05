@@ -11,7 +11,7 @@ Project solely developed by Afonso Machado Neves, for the *Functional and Logic 
 
 ## Installation and Execution
 
-In order to play the game, follow these steps:
+To play the game, follow these steps:
 
 1. Install [*SICStus Prolog 4.9*](https://sicstus.sics.se/download4.html)
 2. Download the ***src*** folder from the ZIP archive.
@@ -23,7 +23,7 @@ In order to play the game, follow these steps:
 
 ## Game Description
 
-**STAQS** is a strategic two-player board game played on a 5x5 grid in which players take turns moving their stacks one step at a time, aiming to create the tallest stack on the board. The game combines elements of territory control and vertical stacking, challenging players to outmaneuver their opponent through clever positioning and stack building. The game ends when no more moves are possible, and victory goes to the player who controls the tallest stack.
+**STAQS** is a strategic two-player board game played on a 5x5 grid. Players take turns moving their stacks one step at a time, aiming to create the tallest stack on the board. The game combines territory control and vertical stacking, challenging players to outmaneuver their opponent through clever positioning and stack building. The game ends when no more moves are possible, and victory goes to the player who controls the tallest stack.
 
 ### Components
 * 25 neutral stackable pieces.
@@ -50,7 +50,7 @@ In order to play the game, follow these steps:
 
 ## Considerations for Game Extensions
 
-Since the game is relatively simple, there were several considerations for extending the game to make it more challenging and engaging for players. Unfortunately, due to time and manpower constraints, these features were not implemented in the current version of the game. However, they could be considered for future development:
+Since the game is relatively simple, there were several considerations for extending it to make it more challenging and engaging for players. Unfortunately, due to time and manpower constraints, these features were not implemented in the current version of the game. However, they could be considered for future development:
 
 1. **Variable Board Sizes:** Allow players to choose different board sizes.
 
@@ -76,8 +76,8 @@ The most central aspect of the game logic is the internal game state representat
 ```prolog
 [Board, CurrentPlayer, BluePlayer, WhitePlayer, RemainingBlue, RemainingWhite]
 ```
-This structure contains the folowing elements:
-- Board: A 5x5 grid represented as a list of lists, each containing the stack information for each cell. The pieces are represented as atoms, such as `empty`, `neutral`, or a list of the player color and stack height, such as `[blue, 2]`.
+This structure contains the following elements:
+- Board: A 5x5 grid represented as a list of lists, each containing the stack information for each cell. The pieces are represented as atoms, such as `empty`, or `neutral`, or a list of the player color and stack height, such as `[blue, 2]`.
 
 - Current Player: The player whose turn it is to move. The player is represented as an atom, either `blue` or `white`.
 
@@ -95,15 +95,15 @@ The `GameState` is updated by applying moves to the board and changing the curre
 - Final: `[[empty, empty, empty, ...], blue, [human, 'Blue'], [human, 'White'], 0, 0]`
 
 ### Move Representation
-Since the game is separated in the placing and moving phases, moves are represented differently depending on the phase. The `move/3` predicate is responsible for updating the game state based on the move provided by the player. The move representation is as follows:
+Since the game is separated into the placing and moving phases, moves are represented differently depending on the phase. The `move/3` predicate is responsible for updating the game state based on the move provided by the player. The move representation is as follows:
 
 - Placing: `[CordX, CordY]`
 - Moving: `[CordX, CordY, Direction]`
 
-Since the board has coordinates (1,1) on the bottom-left corner, the move\3 and other predicates must convert the CordY to 6 - CordY, so the coordinates are correctly represented when handling the matrix.
+Since the board has coordinates (1,1) in the bottom-left corner, the move\3 and other predicates must convert the CordY to 6 - CordY, so the coordinates are correctly represented when handling the matrix.
 
 ### User Interaction
-Both the `GameMode Selector`, `Difficulty Selector`, and `PlayerName Selector` predicates are responsible for fetching the user input and setting up the game configuration using the `read_and_validate_int\2` and `read_and_validate_string\2` predicates. This predicates ensure that the user input is valid and within the expected range or format depending on the context.
+Both the `GameMode Selector`, `Difficulty Selector`, and `PlayerName Selector` predicates are responsible for fetching the user input and setting up the game configuration using the `read_and_validate_int\2` and `read_and_validate_string\2` predicates. These predicates ensure that the user input is valid and within the expected range or format depending on the context.
 
 Later on, the `read_and_validate_place\1` and `read_and_validate_move\1` predicates are responsible for fetching the user input during the placing and moving phases, respectively. These predicates ensure that the user input is valid and within the expected range and also validate the move based on the current game state.
 
@@ -125,6 +125,22 @@ Since the group project was developed individually, additional features were una
 - [PFL Lecture Slides](https://moodle2425.up.pt/course/view.php?id=4040)
 - [SICStus Prolog Documentation](https://sicstus.sics.se/documentation.html)
 - [Stack Overflow](https://stackoverflow.com/)
+- [Grammarly](https://app.grammarly.com)
 - [ChatGPT](https://chatgpt.com/) and [GitHub Copilot](https://github.com/features/copilot) were used for the following tasks:
     - Fix bugs in the *game.pl* file, most notably in the `move/3`, `valid_moves/3`, and `game_over/1` predicates.
     - Fix grammatical errors and improve the overall quality of the README file.
+
+## Annexes
+
+In this section, you can find screenshots of the game interface during the different phases of the game.
+
+### Main Menu
+<img src="images/main_menu.png" alt="Main Menu" style="max-width: 300px"/></img>
+### Placing Phase
+<img src="images/placing.png" alt="Placing Phase" style="max-width: 300px"/></img>
+### Moving Phase
+<img src="images/moving.png" alt="Moving Phase" style="max-width: 300px"/></img>
+### Final Moments
+<img src="images/final.png" alt="Final Moments" style="max-width: 300px"/></img>
+### Game Over
+<img src="images/winner.png" alt="Game Over" style="max-width: 300px"/></img>
