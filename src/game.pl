@@ -310,14 +310,17 @@ game_over(GameState, Winner) :-
 
 % choose_move(+GameState, +Level, -Move)
 % Chooses the move for the computer player.
-choose_move(GameState, 1, Move) :-
+% --------------- %
+% COMPUTER PLAYER %
+% --------------- %
+choose_move([Board, _, _, _, 0, 0], 1, Move) :-
     % Find all valid moves.
     valid_moves(GameState, ListOfMoves),
     % Choose a random move from the list.
     random_member(Move, ListOfMoves).
-choose_move(GameState, 2, Move) :-
+choose_move([Board, CurrentPlayer, BPlayer, WPlayer, 0, 0], 2, Move) :-
     % GameState expansion for easier access.
-    GameState = [_, CurrentPlayer, _, _, _, _],
+    GameState = [Board, CurrentPlayer, BPlayer, WPlayer, 0, 0],
     % Find all valid moves.
     valid_moves(GameState, ListOfMoves),
     findall(
@@ -333,7 +336,29 @@ choose_move(GameState, 2, Move) :-
     sort(ListOfValues, SortedListOfValues),
     % Get the best move.
     last(SortedListOfValues, [_, Move]).
-% Chooses the move for the human player.
+choose_move([Board, _, _, _, RemainingBlue, RemainingWhite], 1, Move) :-
+    trace,
+    % Loop until a valid move is generated.
+    repeat,
+        % Generate the X and Y coordinates.
+        random(1, 6, CordX), random(1, 6, CordY),
+        % Check if the coordinates are valid.
+        validate_move(Board, _, [CordX, CordY], Valid),
+        % Exit the loop if the move is valid.
+        (Valid == true -> Move = [CordX, CordY], notrace ; fail).
+choose_move([Board, _, _, _, RemainingBlue, RemainingWhite], 2, Move) :-
+    % Loop until a valid move is generated.
+    repeat,
+        % Generate the X and Y coordinates.
+        random(1, 6, CordX), random(1, 6, CordY),
+        % Check if the coordinates are valid.
+        validate_move(Board, _, [CordX, CordY], Valid),
+        % Exit the loop if the move is valid.
+        (Valid == true -> Move = [CordX, CordY] ; fail).
+
+% ------------ %
+% HUMAN PLAYER %
+% ------------ %
 choose_move([Board, CurrentPlayer, _, _, 0, 0], 0, Move) :-
     % Display the instructions for moving a piece.
     nl, nl, write('Please enter a move in the format: \'X Y [A/W/S/D]\''), nl,
