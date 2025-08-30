@@ -157,3 +157,7 @@ In this section, you can find screenshots of the game interface during the diffe
 <img src="docs/images/winner.png" alt="Game Over" style="max-width: 300px;" />
 </div>
 </div>
+
+## License
+
+This project is distributed under the [MIT License](LICENSE).
